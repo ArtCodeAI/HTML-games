@@ -1,0 +1,241 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منصة معلمي اللغة العربية - قطر (الصفوف 7-10)</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        }
+        body {
+            background-color: #f4f7f9;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 1400px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 16px;
+            box-shadow: 0 10px 25px rgba(0,0,0,0.05);
+            padding: 20px;
+        }
+        h1 {
+            color: #2c3e66;
+            border-right: 6px solid #2c3e66;
+            padding-right: 15px;
+            margin-top: 0;
+        }
+        .filters {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+            background: #eef2f5;
+            padding: 15px;
+            border-radius: 12px;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .filter-group label {
+            font-weight: bold;
+            font-size: 14px;
+            color: #1e3a5f;
+        }
+        select, input {
+            padding: 8px 12px;
+            border-radius: 8px;
+            border: 1px solid #ccc;
+            font-size: 14px;
+            min-width: 150px;
+        }
+        .search-box {
+            flex-grow: 2;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            background: white;
+            border-radius: 12px;
+            overflow-x: auto;
+            display: block;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 12px 8px;
+            text-align: right;
+            vertical-align: top;
+            font-size: 14px;
+        }
+        th {
+            background-color: #2c3e66;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        tr:nth-child(even) {
+            background-color: #f9f9fc;
+        }
+        .badge {
+            background-color: #e1ecf4;
+            color: #0f5b7a;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: inline-block;
+            margin: 2px;
+        }
+        .footer {
+            margin-top: 25px;
+            text-align: center;
+            font-size: 13px;
+            color: #6c757d;
+        }
+        @media (max-width: 768px) {
+            th, td {
+                font-size: 12px;
+                padding: 8px 4px;
+            }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>📚 منصة معلمي اللغة العربية (قطر) - استراتيجيات وحلول الصفوف 7-10</h1>
+    <p>اختر الصف والفصل، وابحث عن الدروس، الاستراتيجيات، والحلول بسهولة.</p>
+
+    <div class="filters">
+        <div class="filter-group">
+            <label>📖 الصف الدراسي:</label>
+            <select id="gradeFilter">
+                <option value="all">الكل</option>
+                <option value="7">الصف السابع</option>
+                <option value="8">الصف الثامن (بيانات أولية - قريباً)</option>
+                <option value="9">الصف التاسع</option>
+                <option value="10">الصف العاشر (بيانات أولية - قريباً)</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>📅 الفصل الدراسي:</label>
+            <select id="semesterFilter">
+                <option value="all">الكل</option>
+                <option value="1">الفصل الأول</option>
+                <option value="2">الفصل الثاني</option>
+            </select>
+        </div>
+        <div class="filter-group">
+            <label>📌 نوع الدرس:</label>
+            <select id="typeFilter">
+                <option value="all">جميع الأنواع</option>
+                <option value="قراءة">قراءة</option>
+                <option value="نحو">نحو</option>
+                <option value="بلاغة">بلاغة</option>
+                <option value="صرف">صرف</option>
+                <option value="إملاء">إملاء</option>
+                <option value="كتابة">كتابة</option>
+                <option value="تحدث">تحدث</option>
+                <option value="استماع">استماع</option>
+                <option value="حديث شريف">حديث شريف</option>
+            </select>
+        </div>
+        <div class="filter-group search-box">
+            <label>🔍 بحث (عنوان الدرس / استراتيجية):</label>
+            <input type="text" id="searchInput" placeholder="مثال: طباق, فكر-زاوج-شارك, إن وأخواتها...">
+        </div>
+    </div>
+
+    <div style="overflow-x: auto;">
+        <table id="dataTable">
+            <thead>
+                <tr>
+                    <th>الصف</th><th>الفصل</th><th>الوحدة</th><th>عنوان الدرس</th><th>نوع الدرس</th><th>الاستراتيجيات المقترحة</th><th>صفحات الطالب</th><th>صفحات المعلم</th><th>الحلول / الإجابات</th>
+                </tr>
+            </thead>
+            <tbody id="tableBody">
+                <tr><td colspan="9">جاري تحميل البيانات...</td></tr>
+            </tbody>
+        </table>
+    </div>
+    <div class="footer">
+        🚀 تم تطوير المنصة لتسهيل الوصول إلى استراتيجيات التدريس والحلول. يتم تحديث البيانات باستمرار.
+    </div>
+</div>
+
+<script>
+    // ----------------------------- البيانات (يمكن تحديثها أو استيرادها من CSV لاحقاً) -----------------------------
+    const lessonsData = [
+        // صف سابع - فصل أول
+        {grade:"7", semester:"1", unit:"من هدي النبوة", title:"فضل العلماء", type:"حديث شريف", strategies:"قراءة موجهة + محاكاة + أعواد مثلجات + مكعب أسئلة", studentPages:"12-18", teacherPages:"12-18", solutions:"إجابات أسئلة الحديث ص13-15، حلول لغويات ص16-17"},
+        {grade:"7", semester:"1", unit:"الأولى", title:"هل تهدد الروبوتات الذكية الجنس البشري؟", type:"قراءة", strategies:"فكر-زاوج-شارك + مناقشة + خرائط مفاهيم", studentPages:"21-28", teacherPages:"77-80", solutions:"إجابات أسئلة الفهم ص23-27"},
+        {grade:"7", semester:"1", unit:"الأولى", title:"إن وأخواتها", type:"نحو", strategies:"استقراء + نمذجة + تدريبات", studentPages:"29-33", teacherPages:"77-80", solutions:"حل تدريبات إن وأخواتها ص31-33"},
+        {grade:"7", semester:"1", unit:"الأولى", title:"زيادة وحذف بعض الحروف", type:"إملاء", strategies:"أمثلة + تدريبات كتابية", studentPages:"34-36", teacherPages:"77-80", solutions:"حل تدريبات الإملاء ص36"},
+        {grade:"7", semester:"1", unit:"الأولى", title:"الألعاب الإلكترونية والبدنية", type:"كتابة", strategies:"تخطيط + كتابة مقال + تقييم ذاتي", studentPages:"37-38", teacherPages:"77-80", solutions:"نموذج إرشادي لكتابة المقال"},
+        {grade:"7", semester:"1", unit:"الثانية", title:"ورد الربيع (قصيدة)", type:"قراءة", strategies:"قراءة موجهة + تحليل صور بيانية", studentPages:"39-49", teacherPages:"39-49", solutions:"إجابات أسئلة القراءة والتحليل ص46-49"},
+        // صف تاسع - فصل أول
+        {grade:"9", semester:"1", unit:"الأولى", title:"المرأة صنو الرجل", type:"قراءة", strategies:"فكر-زاوج-شارك + مناقشة + خرائط مفاهيم", studentPages:"17-22", teacherPages:"17-22", solutions:"إجابات أسئلة النص ص19-21"},
+        {grade:"9", semester:"1", unit:"الأولى", title:"مصادر الأفعال الثلاثية وغير الثلاثية", type:"صرف", strategies:"استقراء + تمارين + أعواد مثلجات", studentPages:"27-31", teacherPages:"27-31", solutions:"حلول تدريبات الصرف ص30-31"},
+        {grade:"9", semester:"1", unit:"الثانية", title:"بطل الصحراء (أحمد شوقي)", type:"قراءة", strategies:"قراءة موجهة + تحليل قصيدة", studentPages:"39-46", teacherPages:"39-46", solutions:"إجابات تحليل القصيدة ص42-45"},
+        // صف تاسع - فصل ثاني (نموذج)
+        {grade:"9", semester:"2", unit:"الرابعة", title:"النعت وأنواعه", type:"نحو", strategies:"استقراء + تمارين + تدريبات", studentPages:"89-93", teacherPages:"89-93", solutions:"حلول تدريبات النعت ص91-93"},
+        {grade:"9", semester:"2", unit:"الرابعة", title:"دارنا الدمشقية (نزار قباني)", type:"قراءة", strategies:"قراءة موجهة + تحليل", studentPages:"79-87", teacherPages:"79-87", solutions:"إجابات أسئلة النص ص84-86"}
+    ];
+
+    // دالة عرض الجدول
+    function renderTable() {
+        const grade = document.getElementById('gradeFilter').value;
+        const semester = document.getElementById('semesterFilter').value;
+        const type = document.getElementById('typeFilter').value;
+        const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+
+        const filtered = lessonsData.filter(item => {
+            if (grade !== 'all' && item.grade !== grade) return false;
+            if (semester !== 'all' && item.semester !== semester) return false;
+            if (type !== 'all' && item.type !== type) return false;
+            if (searchTerm !== '') {
+                return item.title.toLowerCase().includes(searchTerm) ||
+                       item.strategies.toLowerCase().includes(searchTerm) ||
+                       (item.solutions && item.solutions.toLowerCase().includes(searchTerm));
+            }
+            return true;
+        });
+
+        const tbody = document.getElementById('tableBody');
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="9">❌ لا توجد نتائج تطابق معايير البحث.</td></tr>';
+            return;
+        }
+
+        let html = '';
+        filtered.forEach(item => {
+            html += `<tr>
+                        <td>${item.grade}</td>
+                        <td>${item.semester}</td>
+                        <td>${item.unit}</td>
+                        <td><strong>${item.title}</strong></td>
+                        <td><span class="badge">${item.type}</span></td>
+                        <td>${item.strategies}</td>
+                        <td>${item.studentPages || '—'}</td>
+                        <td>${item.teacherPages || '—'}</td>
+                        <td>${item.solutions || '—'}</td>
+                     </tr>`;
+        });
+        tbody.innerHTML = html;
+    }
+
+    // ربط الأحداث
+    document.getElementById('gradeFilter').addEventListener('change', renderTable);
+    document.getElementById('semesterFilter').addEventListener('change', renderTable);
+    document.getElementById('typeFilter').addEventListener('change', renderTable);
+    document.getElementById('searchInput').addEventListener('input', renderTable);
+
+    // تحميل أولي
+    renderTable();
+</script>
+</body>
+</html>

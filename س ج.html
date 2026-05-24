@@ -1,0 +1,257 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🃏 البطاقات المروحية - لعبة تعاونية</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50, #3498db);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            max-width: 700px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 { color: #2c3e50; }
+        .roles {
+            display: flex;
+            justify-content: space-around;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .role-card {
+            background: linear-gradient(145deg, #f0f4f8, #e2e8f0);
+            border-radius: 20px;
+            padding: 15px;
+            width: 130px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 2px solid transparent;
+        }
+        .role-card.active {
+            border-color: #3498db;
+            background: #e3f2fd;
+            transform: scale(1.05);
+        }
+        .role-icon { font-size: 40px; }
+        .role-name { font-weight: bold; margin: 10px 0; }
+        .role-desc { font-size: 12px; color: #666; }
+        
+        .cards-area {
+            background: #ecf0f1;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .card {
+            background: white;
+            border-radius: 15px;
+            padding: 20px;
+            margin: 10px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            font-size: 18px;
+        }
+        .question-card { border-right: 5px solid #e74c3c; }
+        .answer-area {
+            background: #f9e79f;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 15px 0;
+        }
+        .buttons {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .evaluation {
+            font-size: 14px;
+            padding: 10px;
+            border-radius: 15px;
+            background: #d5f5e3;
+            margin-top: 15px;
+        }
+        .score-board {
+            background: #2c3e50;
+            color: white;
+            padding: 10px;
+            border-radius: 20px;
+            margin-top: 20px;
+        }
+        @media (max-width: 600px) {
+            .role-card { width: 100px; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🃏 البطاقات المروحية</h1>
+    <p>لأربعة طلاب: (ساحب البطاقة) ← (قارئ السؤال) ← (المجيب) ← (المقيم)</p>
+    
+    <div class="roles" id="rolesContainer">
+        <div class="role-card" data-role="1" onclick="selectRole(1)">
+            <div class="role-icon">🃟</div>
+            <div class="role-name">ساحب البطاقة</div>
+            <div class="role-desc">يسحب بطاقة عشوائية</div>
+        </div>
+        <div class="role-card" data-role="2" onclick="selectRole(2)">
+            <div class="role-icon">📖</div>
+            <div class="role-name">قارئ السؤال</div>
+            <div class="role-desc">يقرأ السؤال بصوت مسموع</div>
+        </div>
+        <div class="role-card" data-role="3" onclick="selectRole(3)">
+            <div class="role-icon">💭</div>
+            <div class="role-name">المجيب</div>
+            <div class="role-desc">يجيب عن السؤال</div>
+        </div>
+        <div class="role-card" data-role="4" onclick="selectRole(4)">
+            <div class="role-icon">⭐</div>
+            <div class="role-name">المقيم</div>
+            <div class="role-desc">يقيم الإجابة ويشجع</div>
+        </div>
+    </div>
+    
+    <div class="cards-area">
+        <div class="card question-card" id="questionCard">
+            <strong>السؤال الحالي:</strong><br>
+            <span id="currentQuestion">اضغط "سحب بطاقة" لبدء اللعبة</span>
+        </div>
+        
+        <div class="answer-area">
+            <strong>💬 إجابة المجيب:</strong><br>
+            <textarea id="answerInput" rows="2" style="width: 90%; padding: 10px; border-radius: 15px;" placeholder="اكتب إجابتك هنا..."></textarea>
+        </div>
+        
+        <div class="evaluation" id="evaluationArea">
+            <strong>⭐ تقييم المقيم:</strong><br>
+            <span id="evaluationText">—</span>
+        </div>
+    </div>
+    
+    <div class="buttons">
+        <button onclick="drawCard()">🃟 سحب بطاقة جديدة</button>
+        <button onclick="submitAnswer()">📤 تقديم الإجابة</button>
+        <button onclick="evaluateAnswer()">⭐ تقييم الإجابة</button>
+    </div>
+    
+    <div class="score-board" id="scoreBoard">
+        🏆 النقاط: 🃟 0 | 📖 0 | 💭 0 | ⭐ 0
+    </div>
+    
+    <div style="margin-top: 20px; font-size: 12px; color: #666;">
+        💡 <strong>طريقة اللعب:</strong> يقوم كل طالب بدوره حسب دوره المحدد. الساحب يسحب بطاقة، القارئ يقرأ السؤال، المجيب يجيب، والمقيم يقيم الإجابة.
+    </div>
+</div>
+
+<script>
+    let currentRole = 1; // 1:ساحب, 2:قارئ, 3:مجيب, 4:مقيم
+    let currentCard = null;
+    let scores = { cardDrawer: 0, reader: 0, answerer: 0, evaluator: 0 };
+    
+    const questionsBank = [
+        "ما الفكرة الرئيسة في النص؟",
+        "اذكر ثلاث استراتيجيات تعلم مناسبة لهذا الدرس.",
+        "كيف يمكن تطبيق ما تعلمته في الحياة اليومية؟",
+        "ما القيمة التربوية المستفادة من القصة؟",
+        "حلل الصورة البيانية في البيت الأول.",
+        "ما العلاقة بين العنوان والمضمون؟"
+    ];
+    
+    function selectRole(role) {
+        currentRole = role;
+        document.querySelectorAll('.role-card').forEach((card, idx) => {
+            if (idx + 1 === role) card.classList.add('active');
+            else card.classList.remove('active');
+        });
+    }
+    
+    function drawCard() {
+        if (currentRole !== 1) {
+            alert("⚠️ الدور الآن لـ'ساحب البطاقة'! الرجاء اختيار الدور الصحيح.");
+            return;
+        }
+        const randomIndex = Math.floor(Math.random() * questionsBank.length);
+        currentCard = questionsBank[randomIndex];
+        document.getElementById('currentQuestion').innerHTML = currentCard;
+        scores.cardDrawer++;
+        updateScore();
+        // بعد السحب، دور قارئ السؤال
+        selectRole(2);
+        document.getElementById('evaluationText').innerHTML = "—";
+        document.getElementById('answerInput').value = "";
+    }
+    
+    function submitAnswer() {
+        if (currentRole !== 3) {
+            alert("⚠️ الدور الآن للمجيب! الرجاء اختيار الدور الصحيح.");
+            return;
+        }
+        const answer = document.getElementById('answerInput').value.trim();
+        if (answer === "") {
+            alert("الرجاء كتابة الإجابة قبل التقديم.");
+            return;
+        }
+        // حفظ الإجابة في متغير مؤقت
+        window.tempAnswer = answer;
+        scores.answerer++;
+        updateScore();
+        alert("✅ تم تقديم الإجابة. الآن دور المقيم لتقييمها.");
+        selectRole(4);
+    }
+    
+    function evaluateAnswer() {
+        if (currentRole !== 4) {
+            alert("⚠️ الدور الآن للمقيم! الرجاء اختيار الدور الصحيح.");
+            return;
+        }
+        const answer = window.tempAnswer || "";
+        if (answer === "") {
+            alert("لا توجد إجابة للتقييم. الرجاء تقديم إجابة أولاً.");
+            return;
+        }
+        const isGood = confirm(`الإجابة المقدمة:\n"${answer}"\n\nهل الإجابة صحيحة ومفيدة؟\n(اضغط OK إذا كانت صحيحة، Cancel إذا كانت خاطئة)`);
+        if (isGood) {
+            scores.evaluator++;
+            document.getElementById('evaluationText').innerHTML = `✅ إجابة ممتازة! أحسنت. الإجابة: "${answer}"`;
+        } else {
+            document.getElementById('evaluationText').innerHTML = `❓ الإجابة تحتاج مراجعة. حاول مرة أخرى. الإجابة كانت: "${answer}"`;
+        }
+        updateScore();
+        // انتهت الجولة، دور ساحب البطاقة مرة أخرى
+        selectRole(1);
+        window.tempAnswer = "";
+    }
+    
+    function updateScore() {
+        document.getElementById('scoreBoard').innerHTML = `🏆 النقاط: 🃟 ${scores.cardDrawer} | 📖 ${scores.reader} | 💭 ${scores.answerer} | ⭐ ${scores.evaluator}`;
+    }
+    
+    // تهيئة أولية
+    selectRole(1);
+    scores = { cardDrawer: 0, reader: 0, answerer: 0, evaluator: 0 };
+    updateScore();
+</script>
+</body>
+</html>

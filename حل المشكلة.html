@@ -1,0 +1,233 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 الاستقصاء التوجيهي - Guided Inquiry</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 25px;
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 { text-align: center; color: #11998e; }
+        .problem-box {
+            background: #f0f4f8;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .phase {
+            margin: 20px 0;
+            padding: 15px;
+            border-radius: 15px;
+            background: #f9f9f9;
+        }
+        .phase-title {
+            font-weight: bold;
+            color: #11998e;
+            margin-bottom: 10px;
+        }
+        textarea, input {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            margin: 10px 0;
+        }
+        button {
+            background: #11998e;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .hypothesis-list {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 15px;
+        }
+        .hypothesis-item {
+            background: white;
+            padding: 8px;
+            margin: 5px;
+            border-radius: 10px;
+        }
+        .conclusion {
+            background: #d5f5e3;
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🔍 الاستقصاء التوجيهي</h1>
+    <p style="text-align: center;">اتبع خطوات الاستقصاء لحل المشكلة</p>
+    
+    <div class="problem-box">
+        <strong>❓ المشكلة:</strong><br>
+        <span id="problemText">لماذا تذبل أوراق النباتات المنزلية رغم سقيها بانتظام؟</span>
+        <button onclick="changeProblem()">تغيير المشكلة</button>
+    </div>
+    
+    <div class="phase">
+        <div class="phase-title">📋 المرحلة 1: تحديد المشكلة</div>
+        <textarea id="problemRestatement" rows="2" placeholder="أعد صياغة المشكلة بكلماتك الخاصة..."></textarea>
+    </div>
+    
+    <div class="phase">
+        <div class="phase-title">🔬 المرحلة 2: جمع المعلومات (الفرضيات)</div>
+        <input type="text" id="hypothesisInput" placeholder="اقترح فرضية جديدة...">
+        <button onclick="addHypothesis()">➕ إضافة فرضية</button>
+        <div class="hypothesis-list" id="hypothesesList"></div>
+    </div>
+    
+    <div class="phase">
+        <div class="phase-title">🧪 المرحلة 3: التحقق من الفرضيات</div>
+        <textarea id="verification" rows="3" placeholder="كيف يمكنك اختبار هذه الفرضيات؟ اذكر طرق التحقق..."></textarea>
+    </div>
+    
+    <div class="phase">
+        <div class="phase-title">✅ المرحلة 4: الاستنتاج</div>
+        <textarea id="conclusion" rows="3" placeholder="اكتب استنتاجك النهائي..."></textarea>
+        <button onclick="submitInquiry()">📤 تقديم الاستقصاء</button>
+    </div>
+    
+    <div id="inquiryFeedback" style="margin-top: 15px; display: none;"></div>
+</div>
+
+<script>
+    let hypotheses = [];
+    let currentProblem = "لماذا تذبل أوراق النباتات المنزلية رغم سقيها بانتظام؟";
+    
+    const problemsList = [
+        "لماذا تذبل أوراق النباتات المنزلية رغم سقيها بانتظام؟",
+        "كيف يمكن تحسين جودة الهواء في المدن الكبيرة؟",
+        "ما أسباب نجاح بعض الطلاب وتفوقهم دراسياً؟",
+        "كيف يمكن تقليل استهلاك الماء في المنزل؟"
+    ];
+    
+    function renderHypotheses() {
+        const container = document.getElementById('hypothesesList');
+        if (hypotheses.length === 0) {
+            container.innerHTML = '<div style="color:#999;">لا توجد فرضيات بعد. أضف فرضيتك الأولى.</div>';
+        } else {
+            container.innerHTML = hypotheses.map((h, idx) => `
+                <div class="hypothesis-item">
+                    🔬 ${h}
+                    <button style="background:#e74c3c; padding:2px 8px; margin-right:10px;" onclick="removeHypothesis(${idx})">✖</button>
+                </div>
+            `).join('');
+        }
+    }
+    
+    function addHypothesis() {
+        const input = document.getElementById('hypothesisInput');
+        const hyp = input.value.trim();
+        if (hyp === "") {
+            alert("الرجاء إدخال فرضية.");
+            return;
+        }
+        hypotheses.push(hyp);
+        renderHypotheses();
+        input.value = "";
+    }
+    
+    function removeHypothesis(index) {
+        hypotheses.splice(index, 1);
+        renderHypotheses();
+    }
+    
+    function changeProblem() {
+        const currentIndex = problemsList.indexOf(currentProblem);
+        const nextIndex = (currentIndex + 1) % problemsList.length;
+        currentProblem = problemsList[nextIndex];
+        document.getElementById('problemText').innerHTML = currentProblem;
+        // إعادة تعيين الحقول
+        document.getElementById('problemRestatement').value = "";
+        hypotheses = [];
+        renderHypotheses();
+        document.getElementById('verification').value = "";
+        document.getElementById('conclusion').value = "";
+        document.getElementById('inquiryFeedback').style.display = 'none';
+    }
+    
+    function submitInquiry() {
+        const restatement = document.getElementById('problemRestatement').value.trim();
+        const verification = document.getElementById('verification').value.trim();
+        const conclusionText = document.getElementById('conclusion').value.trim();
+        
+        let feedback = "<strong>📊 نتائج الاستقصاء:</strong><br>";
+        let score = 50; // درجة أساسية
+        
+        if (restatement) {
+            feedback += `✅ إعادة صياغة المشكلة: "${restatement}"<br>`;
+            score += 15;
+        } else {
+            feedback += "⚠️ يُفضل إعادة صياغة المشكلة بكلماتك الخاصة.<br>";
+        }
+        
+        if (hypotheses.length > 0) {
+            feedback += `✅ الفرضيات (${hypotheses.length}): ${hypotheses.join("، ")}<br>`;
+            score += Math.min(hypotheses.length * 5, 20);
+        } else {
+            feedback += "⚠️ لم تقم بإضافة أي فرضية.<br>";
+        }
+        
+        if (verification) {
+            feedback += `✅ طريقة التحقق: "${verification}"<br>`;
+            score += 15;
+        }
+        
+        if (conclusionText) {
+            feedback += `✅ الاستنتاج: "${conclusionText}"<br>`;
+            score += 20;
+        }
+        
+        feedback += `<br>🏆 درجة الاستقصاء: ${score}/100<br>`;
+        
+        if (score >= 80) feedback += "🎉 ممتاز! لقد طبقت خطوات الاستقصاء العلمي بشكل جيد.";
+        else if (score >= 60) feedback += "👍 جيد، حاول أن تكون أكثر دقة في الفرضيات والاستنتاج.";
+        else feedback += "📚 حاول مرة أخرى، ركز على تحديد المشكلة واقتراح فرضيات قابلة للاختبار.";
+        
+        const feedbackDiv = document.getElementById('inquiryFeedback');
+        feedbackDiv.innerHTML = feedback;
+        feedbackDiv.style.display = 'block';
+        
+        // حفظ السجل
+        const record = {
+            problem: currentProblem,
+            restatement: restatement,
+            hypotheses: hypotheses,
+            verification: verification,
+            conclusion: conclusionText,
+            score: score,
+            date: new Date()
+        };
+        let history = JSON.parse(localStorage.getItem('inquiryHistory') || '[]');
+        history.push(record);
+        localStorage.setItem('inquiryHistory', JSON.stringify(history));
+    }
+    
+    renderHypotheses();
+</script>
+</body>
+</html>

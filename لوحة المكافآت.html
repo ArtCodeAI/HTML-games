@@ -1,0 +1,206 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🏆 لوحة المكافآت - تعزيز المشاركة</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f5f7fa, #c3cfe2);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            background: white;
+            border-radius: 40px;
+            padding: 25px;
+            max-width: 900px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+        }
+        h1 { color: #2c3e50; text-align: center; }
+        .subtitle { text-align: center; color: #666; margin-bottom: 25px; }
+        
+        .students-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .student-card {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 20px;
+            padding: 15px;
+            transition: 0.3s;
+            text-align: center;
+        }
+        .student-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .stars {
+            display: flex;
+            justify-content: center;
+            gap: 5px;
+            margin: 10px 0;
+        }
+        .star {
+            font-size: 28px;
+            cursor: pointer;
+            transition: 0.2s;
+            color: #ccc;
+        }
+        .star.active { color: #f1c40f; text-shadow: 0 0 5px #f39c12; }
+        .points {
+            font-size: 14px;
+            color: #2c3e50;
+            margin-top: 10px;
+        }
+        .controls {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-top: 20px;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+        .reset-btn { background: #e74c3c; }
+        .add-student {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        input { flex: 1; padding: 10px; border-radius: 30px; border: 1px solid #ccc; }
+        .celebration {
+            position: fixed;
+            bottom: 20px;
+            left: 20px;
+            background: #2ecc71;
+            color: white;
+            padding: 10px 20px;
+            border-radius: 30px;
+            animation: fadeOut 2s forwards;
+        }
+        @keyframes fadeOut {
+            0% { opacity: 1; transform: translateY(0); }
+            70% { opacity: 1; }
+            100% { opacity: 0; transform: translateY(-50px); display: none; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🏆 لوحة المكافآت</h1>
+    <div class="subtitle">⭐ امنح الطلاب نجومًا (1-5) لكل مشاركة ممتازة ⭐</div>
+    
+    <div class="students-grid" id="studentsGrid"></div>
+    
+    <div class="controls">
+        <button onclick="resetAllStars()">🔄 إعادة ضبط كل النجوم</button>
+        <button onclick="saveToLocal()">💾 حفظ</button>
+    </div>
+    
+    <div class="add-student">
+        <input type="text" id="newStudentName" placeholder="اسم الطالب الجديد">
+        <button onclick="addStudent()">➕ إضافة طالب</button>
+    </div>
+</div>
+
+<script>
+    let students = [];
+    
+    function loadStudents() {
+        const saved = localStorage.getItem('rewardBoardStudents');
+        if (saved) {
+            students = JSON.parse(saved);
+        } else {
+            students = [
+                { name: "أحمد", stars: 0 },
+                { name: "فاطمة", stars: 0 },
+                { name: "محمد", stars: 0 },
+                { name: "نورا", stars: 0 },
+                { name: "عمر", stars: 0 }
+            ];
+        }
+        render();
+    }
+    
+    function saveStudents() {
+        localStorage.setItem('rewardBoardStudents', JSON.stringify(students));
+    }
+    
+    function render() {
+        const grid = document.getElementById('studentsGrid');
+        grid.innerHTML = students.map((student, idx) => `
+            <div class="student-card">
+                <div class="student-name">${student.name}</div>
+                <div class="stars">
+                    ${[1,2,3,4,5].map(starNum => `
+                        <span class="star ${student.stars >= starNum ? 'active' : ''}" onclick="setStars(${idx}, ${starNum})">★</span>
+                    `).join('')}
+                </div>
+                <div class="points">🏅 ${student.stars} نقطة</div>
+            </div>
+        `).join('');
+        saveStudents();
+    }
+    
+    function setStars(studentIndex, starsCount) {
+        if (students[studentIndex].stars < starsCount) {
+            // زيادة
+            showCelebration(`🎉 ${students[studentIndex].name} حصل على ${starsCount} نجوم! 🎉`);
+        }
+        students[studentIndex].stars = starsCount;
+        render();
+    }
+    
+    function showCelebration(message) {
+        const div = document.createElement('div');
+        div.className = 'celebration';
+        div.innerHTML = message;
+        document.body.appendChild(div);
+        setTimeout(() => div.remove(), 2000);
+    }
+    
+    function resetAllStars() {
+        if (confirm("هل تريد إعادة ضبط جميع النجوم إلى صفر؟")) {
+            students.forEach(s => s.stars = 0);
+            render();
+        }
+    }
+    
+    function addStudent() {
+        const input = document.getElementById('newStudentName');
+        const name = input.value.trim();
+        if (name === "") {
+            alert("الرجاء إدخال اسم الطالب");
+            return;
+        }
+        students.push({ name: name, stars: 0 });
+        render();
+        input.value = "";
+    }
+    
+    function saveToLocal() {
+        alert("تم حفظ البيانات محليًا.");
+        saveStudents();
+    }
+    
+    loadStudents();
+</script>
+</body>
+</html>

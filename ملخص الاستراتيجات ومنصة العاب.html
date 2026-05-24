@@ -1,0 +1,468 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>منصة معلم اللغة العربية - قطر | ألعاب + منهج</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #f0f2f5;
+            direction: rtl;
+            padding: 20px;
+        }
+        /* شريط التنقل */
+        .navbar {
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            color: white;
+            padding: 15px 25px;
+            border-radius: 20px;
+            margin-bottom: 20px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+        }
+        .logo {
+            font-size: 24px;
+            font-weight: bold;
+        }
+        .nav-links {
+            display: flex;
+            gap: 10px;
+            flex-wrap: wrap;
+        }
+        .nav-btn {
+            background: rgba(255,255,255,0.2);
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            color: white;
+            cursor: pointer;
+            transition: 0.3s;
+        }
+        .nav-btn:hover, .nav-btn.active {
+            background: #ff9800;
+            color: #1e3c72;
+        }
+        /* الحاوية الرئيسية */
+        .main-container {
+            background: white;
+            border-radius: 25px;
+            padding: 20px;
+            min-height: 600px;
+            box-shadow: 0 10px 30px rgba(0,0,0,0.1);
+        }
+        /* شاشة المنهج */
+        .filters {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            margin-bottom: 20px;
+            padding: 15px;
+            background: #f8f9fa;
+            border-radius: 20px;
+        }
+        .filter-group {
+            display: flex;
+            flex-direction: column;
+            gap: 5px;
+        }
+        .filter-group label {
+            font-weight: bold;
+            font-size: 12px;
+            color: #666;
+        }
+        select, input {
+            padding: 8px 12px;
+            border-radius: 20px;
+            border: 1px solid #ddd;
+            min-width: 120px;
+        }
+        .search-box {
+            flex-grow: 2;
+        }
+        .search-box input {
+            width: 100%;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            overflow-x: auto;
+            display: block;
+        }
+        th, td {
+            border: 1px solid #ddd;
+            padding: 10px;
+            text-align: right;
+            font-size: 14px;
+        }
+        th {
+            background: #1e3c72;
+            color: white;
+            position: sticky;
+            top: 0;
+        }
+        .badge {
+            background: #e1ecf4;
+            color: #0f5b7a;
+            padding: 4px 8px;
+            border-radius: 20px;
+            font-size: 12px;
+            display: inline-block;
+        }
+        /* شاشة الألعاب */
+        .games-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 10px;
+        }
+        .game-card {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 2px solid transparent;
+        }
+        .game-card:hover {
+            transform: translateY(-5px);
+            border-color: #1e3c72;
+            box-shadow: 0 10px 20px rgba(0,0,0,0.1);
+        }
+        .game-icon {
+            font-size: 60px;
+            margin-bottom: 15px;
+        }
+        .game-name {
+            font-size: 18px;
+            font-weight: bold;
+            margin-bottom: 10px;
+            color: #1e3c72;
+        }
+        .game-strategy {
+            font-size: 12px;
+            color: #666;
+            margin-bottom: 15px;
+        }
+        .game-btn {
+            background: #1e3c72;
+            color: white;
+            border: none;
+            padding: 8px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+        }
+        /* نافذة اللعبة المنبثقة */
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.8);
+            z-index: 1000;
+            overflow: auto;
+        }
+        .modal-content {
+            background: white;
+            margin: 20px auto;
+            padding: 20px;
+            width: 95%;
+            max-width: 1200px;
+            border-radius: 20px;
+            position: relative;
+        }
+        .close-modal {
+            position: absolute;
+            top: 10px;
+            left: 20px;
+            font-size: 30px;
+            cursor: pointer;
+            background: #e74c3c;
+            color: white;
+            width: 40px;
+            height: 40px;
+            border-radius: 50%;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .game-iframe {
+            width: 100%;
+            height: 80vh;
+            border: none;
+            border-radius: 15px;
+        }
+        @media (max-width: 768px) {
+            th, td { font-size: 12px; padding: 6px; }
+            .game-card { padding: 15px; }
+            .game-icon { font-size: 40px; }
+        }
+    </style>
+</head>
+<body>
+<div class="navbar">
+    <div class="logo">📚 منصة معلم اللغة العربية - قطر</div>
+    <div class="nav-links">
+        <button class="nav-btn active" onclick="showSection('curriculum')">📖 المنهج والاستراتيجيات</button>
+        <button class="nav-btn" onclick="showSection('games')">🎮 الألعاب التعليمية (20 لعبة)</button>
+    </div>
+</div>
+
+<div class="main-container" id="mainContainer">
+    <!-- قسم المنهج -->
+    <div id="curriculumSection">
+        <div class="filters">
+            <div class="filter-group">
+                <label>📖 الصف:</label>
+                <select id="gradeFilter">
+                    <option value="all">الكل</option>
+                    <option value="7">الصف السابع</option>
+                    <option value="8">الصف الثامن</option>
+                    <option value="9">الصف التاسع</option>
+                    <option value="10">الصف العاشر</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>📅 الفصل:</label>
+                <select id="semesterFilter">
+                    <option value="all">الكل</option>
+                    <option value="1">الفصل الأول</option>
+                    <option value="2">الفصل الثاني</option>
+                </select>
+            </div>
+            <div class="filter-group">
+                <label>📌 نوع الدرس:</label>
+                <select id="typeFilter">
+                    <option value="all">جميع الأنواع</option>
+                    <option value="قراءة">قراءة</option>
+                    <option value="نحو">نحو</option>
+                    <option value="بلاغة">بلاغة</option>
+                    <option value="صرف">صرف</option>
+                    <option value="إملاء">إملاء</option>
+                    <option value="كتابة">كتابة</option>
+                    <option value="تحدث">تحدث</option>
+                    <option value="استماع">استماع</option>
+                    <option value="حديث شريف">حديث شريف</option>
+                </select>
+            </div>
+            <div class="filter-group search-box">
+                <label>🔍 بحث:</label>
+                <input type="text" id="searchInput" placeholder="عنوان الدرس / استراتيجية...">
+            </div>
+        </div>
+        <div style="overflow-x: auto;">
+            <table id="dataTable">
+                <thead>
+                    <tr><th>الصف</th><th>الفصل</th><th>الوحدة</th><th>عنوان الدرس</th><th>نوع الدرس</th><th>الاستراتيجيات</th><th>الحلول/الإجابات</th><th>صفحات المعلم</th></tr>
+                </thead>
+                <tbody id="tableBody"></tbody>
+            </table>
+        </div>
+    </div>
+
+    <!-- قسم الألعاب -->
+    <div id="gamesSection" style="display: none;">
+        <div class="games-grid" id="gamesGrid"></div>
+    </div>
+</div>
+
+<!-- نافذة اللعبة المنبثقة -->
+<div id="gameModal" class="modal">
+    <div class="modal-content">
+        <div class="close-modal" onclick="closeGame()">✖</div>
+        <iframe id="gameIframe" class="game-iframe" srcdoc=""></iframe>
+    </div>
+</div>
+
+<script>
+    // ----------------------------- بيانات المنهج -----------------------------
+    const lessonsData = [
+        // الصف السابع - الفصل الأول
+        {grade:"7", semester:"1", unit:"من هدي النبوة", title:"فضل العلماء", type:"حديث شريف", strategies:"قراءة موجهة + محاكاة + أعواد مثلجات + مكعب أسئلة", solutions:"إجابات أسئلة الحديث ص13-15، حلول لغويات ص16-17", teacherPages:"12-18"},
+        {grade:"7", semester:"1", unit:"الأولى", title:"هل تهدد الروبوتات الذكية الجنس البشري؟", type:"قراءة", strategies:"فكر-زاوج-شارك + مناقشة + خرائط مفاهيم", solutions:"إجابات أسئلة الفهم ص23-27", teacherPages:"21-28"},
+        {grade:"7", semester:"1", unit:"الأولى", title:"إن وأخواتها", type:"نحو", strategies:"استقراء + نمذجة + تدريبات", solutions:"حل تدريبات إن وأخواتها ص31-33", teacherPages:"29-33"},
+        {grade:"7", semester:"1", unit:"الأولى", title:"زيادة وحذف بعض الحروف", type:"إملاء", strategies:"أمثلة + تدريبات كتابية", solutions:"حل تدريبات الإملاء ص36", teacherPages:"34-36"},
+        {grade:"7", semester:"1", unit:"الأولى", title:"الألعاب الإلكترونية والبدنية", type:"كتابة", strategies:"تخطيط + كتابة مقال + تقييم ذاتي", solutions:"نموذج إرشادي لكتابة المقال", teacherPages:"37-38"},
+        {grade:"7", semester:"2", unit:"الثانية", title:"ورد الربيع (قصيدة)", type:"قراءة", strategies:"قراءة موجهة + تحليل صور بيانية", solutions:"إجابات أسئلة القراءة والتحليل ص46-49", teacherPages:"39-49"},
+        // الصف التاسع - الفصل الأول
+        {grade:"9", semester:"1", unit:"الأولى", title:"المرأة صنو الرجل", type:"قراءة", strategies:"فكر-زاوج-شارك + مناقشة + خرائط مفاهيم", solutions:"إجابات أسئلة النص ص19-21", teacherPages:"17-22"},
+        {grade:"9", semester:"1", unit:"الأولى", title:"مصادر الأفعال الثلاثية وغير الثلاثية", type:"صرف", strategies:"استقراء + تمارين + أعواد مثلجات", solutions:"حلول تدريبات الصرف ص30-31", teacherPages:"27-31"},
+        {grade:"9", semester:"1", unit:"الثانية", title:"بطل الصحراء (أحمد شوقي)", type:"قراءة", strategies:"قراءة موجهة + تحليل قصيدة", solutions:"إجابات تحليل القصيدة ص42-45", teacherPages:"39-46"},
+        {grade:"9", semester:"2", unit:"الرابعة", title:"النعت وأنواعه", type:"نحو", strategies:"استقراء + تمارين + تدريبات", solutions:"حلول تدريبات النعت ص91-93", teacherPages:"89-93"}
+    ];
+
+    // ----------------------------- قائمة الألعاب -----------------------------
+    const games = [
+        { id:1, name:"🎲 مكعب الأسئلة", strategy:"مكعب الأسئلة", icon:"🎲", description:"يرمي الطالب المكعب ويجيب عن السؤال الذي يظهر" },
+        { id:2, name:"🍦 أعواد المثلجات", strategy:"أعواد المثلجات", icon:"🍦", description:"سحب اسم طالب عشوائيًا للإجابة" },
+        { id:3, name:"🃏 البطاقات المروحية", strategy:"البطاقات المروحية", icon:"🃏", description:"أربعة أدوار: سحب، قراءة، إجابة، تقييم" },
+        { id:4, name:"🏆 لوحة المكافآت", strategy:"التعزيز الإيجابي", icon:"🏆", description:"منح نجوم للمشاركة المتميزة" },
+        { id:5, name:"🚦 سبورة الأكواب", strategy:"أكواب إشارة المرور", icon:"🚦", description:"تعبير عن مستوى الفهم بالألوان" },
+        { id:6, name:"🧩 تركيب الصورة (Jigsaw)", strategy:"التعلم التعاوني التكاملي", icon:"🧩", description:"مجموعات أصلية وخبيرة" },
+        { id:7, name:"⏱️ سباق التلخيص", strategy:"التلخيص", icon:"⏱️", description:"تلخيص النص في دقيقة واحدة" },
+        { id:8, name:"🎭 تمثيل الأدوار", strategy:"تبادل الأدوار", icon:"🎭", description:"تمثيل مشهد درامي" },
+        { id:9, name:"📊 مخطط التدفق", strategy:"خريطة التدفق", icon:"📊", description:"تنظيم الأحداث في تسلسل زمني" },
+        { id:10, name:"🔍 الاستقصاء التوجيهي", strategy:"الاستقصاء", icon:"🔍", description:"حل المشكلة بخطوات علمية" },
+        { id:11, name:"👥 الزميل المجاور", strategy:"فكر-زاوج-شارك", icon:"👥", description:"فكر، ناقش جارك، اتفقا على إجابة" },
+        { id:12, name:"🕸️ شبكة العنكبوت", strategy:"شبكة العنكبوت", icon:"🕸️", description:"تمرير الكرة وربط الأفكار" },
+        { id:13, name:"🦅 الطائر الفراري", strategy:"الكتابة التعاونية", icon:"🦅", description:"كتابة متداولة بين المجموعات" },
+        { id:14, name:"🔍 فحص الأقران", strategy:"فحص الأقران", icon:"🔍", description:"مراجعة إجابات الزملاء" },
+        { id:15, name:"🌳 شجرة الأفكار", strategy:"الخريطة الشجرية", icon:"🌳", description:"تصنيف الأفكار الرئيسة والفرعية" },
+        { id:16, name:"✍️ تمرير القلم", strategy:"تمرير القلم", icon:"✍️", description:"كل طالب يكتب جملة ويكمل القصة" },
+        { id:17, name:"📋 القصاصات الصغيرة", strategy:"القصاصات الصغيرة", icon:"📋", description:"سحب سؤال عشوائي والإجابة عليه" },
+        { id:18, name:"📖 القراءة المشتركة", strategy:"القراءة المشتركة", icon:"📖", description:"القراءة معًا وتحسين الطلاقة" },
+        { id:19, name:"⚡ المزاوجة السريعة", strategy:"المزاوجة السريعة", icon:"⚡", description:"إيجاد شريك ومناقشة سؤال" },
+        { id:20, name:"🎫 تذكرة الخروج", strategy:"تذكرة الخروج", icon:"🎫", description:"تقييم نهاية الحصة بسؤالين" }
+    ];
+
+    // ===================== دوال عرض المنهج =====================
+    function renderTable() {
+        const grade = document.getElementById('gradeFilter').value;
+        const semester = document.getElementById('semesterFilter').value;
+        const type = document.getElementById('typeFilter').value;
+        const searchTerm = document.getElementById('searchInput').value.trim().toLowerCase();
+
+        const filtered = lessonsData.filter(item => {
+            if (grade !== 'all' && item.grade !== grade) return false;
+            if (semester !== 'all' && item.semester !== semester) return false;
+            if (type !== 'all' && item.type !== type) return false;
+            if (searchTerm) {
+                return item.title.toLowerCase().includes(searchTerm) ||
+                       item.strategies.toLowerCase().includes(searchTerm) ||
+                       (item.solutions && item.solutions.toLowerCase().includes(searchTerm));
+            }
+            return true;
+        });
+
+        const tbody = document.getElementById('tableBody');
+        if (filtered.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="8">❌ لا توجد نتائج تطابق معايير البحث.</td></tr>';
+            return;
+        }
+
+        let html = '';
+        filtered.forEach(item => {
+            html += `<tr>
+                        <td>${item.grade}</td>
+                        <td>${item.semester}</td>
+                        <td>${item.unit}</td>
+                        <td><strong>${item.title}</strong></td>
+                        <td><span class="badge">${item.type}</span></td>
+                        <td>${item.strategies}</td>
+                        <td>${item.solutions || '—'}</td>
+                        <td>${item.teacherPages || '—'}</td>
+                     </tr>`;
+        });
+        tbody.innerHTML = html;
+    }
+
+    // ===================== دوال عرض الألعاب =====================
+    function renderGames() {
+        const container = document.getElementById('gamesGrid');
+        container.innerHTML = games.map(game => `
+            <div class="game-card">
+                <div class="game-icon">${game.icon}</div>
+                <div class="game-name">${game.name}</div>
+                <div class="game-strategy">📌 ${game.strategy}</div>
+                <div class="game-strategy" style="font-size:11px;">${game.description}</div>
+                <button class="game-btn" onclick="openGame(${game.id})">▶️ تشغيل اللعبة</button>
+            </div>
+        `).join('');
+    }
+
+    // ===================== دوال الألعاب (المدمجة) =====================
+    // ألعاب HTML مضمنة (مبسطة) - يمكن استبدالها بالأكواد الكاملة
+    function getGameHTML(gameId) {
+        const gamesHTML = {
+            1: `<div style="text-align:center; padding:50px; font-family:'Segoe UI';"><h1>🎲 مكعب الأسئلة</h1><p>اضغط على المكعب لرميه والإجابة عن السؤال</p><div style="font-size:100px;">🎲</div><button onclick="alert('السؤال: ما الفكرة الرئيسة في النص؟')">رمي المكعب</button></div>`,
+            2: `<div style="text-align:center; padding:50px;"><h1>🍦 أعواد المثلجات</h1><p>اضغط لسحب اسم طالب عشوائي</p><button onclick="const names=['أحمد','فاطمة','محمد','نورا']; alert('الطالب المختار: '+names[Math.floor(Math.random()*names.length)])">سحب عود</button></div>`,
+            3: `<div style="text-align:center; padding:50px;"><h1>🃏 البطاقات المروحية</h1><p>لعبة تعاونية لأربعة طلاب</p><button onclick="alert('الساحب يسحب بطاقة، القارئ يقرأ، المجيب يجيب، المقيم يقيم')">بدء اللعبة</button></div>`,
+            4: `<div style="text-align:center; padding:50px;"><h1>🏆 لوحة المكافآت</h1><p>امنح الطلاب نجومًا للمشاركة المتميزة</p><button onclick="alert('تم منح نجمة للطالب المتميز')">⭐ منح نجمة</button></div>`,
+            5: `<div style="text-align:center; padding:50px;"><h1>🚦 سبورة الأكواب</h1><p>اختر لونًا يعبر عن مستوى فهمك</p><div style="display:flex; gap:20px; justify-content:center;"><button style="background:red;">🔴 أحمر (لا أفهم)</button><button style="background:yellow;">🟡 أصفر (أفهم جزئياً)</button><button style="background:green;">🟢 أخضر (أفهم تماماً)</button></div></div>`,
+            6: `<div style="text-align:center; padding:50px;"><h1>🧩 تركيب الصورة (Jigsaw)</h1><p>التعلم التعاوني - مجموعات أصلية وخبيرة</p><button onclick="alert('المرحلة 1: مجموعات أصلية\nالمرحلة 2: مجموعات خبيرة\nالمرحلة 3: العودة للتعليم المتبادل')">عرض المراحل</button></div>`,
+            7: `<div style="text-align:center; padding:50px;"><h1>⏱️ سباق التلخيص</h1><textarea rows="4" style="width:80%;" placeholder="اكتب خلاصتك هنا..."></textarea><button>تقديم</button></div>`,
+            8: `<div style="text-align:center; padding:50px;"><h1>🎭 تمثيل الأدوار</h1><p>اختر دورك وقم بتمثيل المشهد</p><select><option>معلم</option><option>طالب</option><option>مدير</option></select><button>بدء التمثيل</button></div>`,
+            9: `<div style="text-align:center; padding:50px;"><h1>📊 مخطط التدفق</h1><p>نظّم الأحداث في تسلسل زمني</p><button onclick="alert('الخطوة 1: تحديد الفكرة\nالخطوة 2: جمع المعلومات\nالخطوة 3: التنظيم')">عرض المخطط</button></div>`,
+            10: `<div style="text-align:center; padding:50px;"><h1>🔍 الاستقصاء التوجيهي</h1><p>اتبع خطوات الاستقصاء لحل المشكلة</p><button onclick="alert('1. تحديد المشكلة\n2. جمع المعلومات\n3. التحقق\n4. الاستنتاج')">عرض الخطوات</button></div>`,
+            11: `<div style="text-align:center; padding:50px;"><h1>👥 الزميل المجاور</h1><p>فكر - ناقش جارك - اتفقا على إجابة</p><button onclick="alert('المرحلة 1: فكر بمفردك\nالمرحلة 2: ناقش جارك\nالمرحلة 3: اتفقا على إجابة')">بدء النشاط</button></div>`,
+            12: `<div style="text-align:center; padding:50px;"><h1>🕸️ شبكة العنكبوت</h1><p>تمرير كرة الخيط وربط الأفكار</p><button onclick="alert('ابدأ بتمرير الكرة إلى طالب آخر ليشارك فكرته')">تمرير</button></div>`,
+            13: `<div style="text-align:center; padding:50px;"><h1>🦅 الطائر الفراري</h1><p>الكتابة التعاونية - كل مجموعة تكتب ثم تنتقل للمجموعة التالية</p><button onclick="alert('المجموعة 1 تكتب المقدمة\nالمجموعة 2 تكتب العرض\nالمجموعة 3 تكتب الخاتمة')">بدء</button></div>`,
+            14: `<div style="text-align:center; padding:50px;"><h1>🔍 فحص الأقران</h1><p>راجع إجابة زميلك وقدم تغذية راجعة</p><button onclick="alert('اطلب من الطلاب تبادل دفاترهم ومراجعة إجابات بعضهم البعض')">بدء المراجعة</button></div>`,
+            15: `<div style="text-align:center; padding:50px;"><h1>🌳 شجرة الأفكار</h1><p>نظّم الأفكار الرئيسة والفرعية</p><button onclick="alert('الفكرة الرئيسة: اللغة العربية\nفروع: النحو، الصرف، البلاغة، الإملاء')">عرض الشجرة</button></div>`,
+            16: `<div style="text-align:center; padding:50px;"><h1>✍️ تمرير القلم</h1><p>كل طالب يكتب جملة ثم يمرر الورقة لزميله</p><button onclick="alert('الطالب 1 يكتب جملة، ثم يمرر للطالب 2 ليكمل...')">بدء</button></div>`,
+            17: `<div style="text-align:center; padding:50px;"><h1>📋 القصاصات الصغيرة</h1><p>اسحب سؤالاً عشوائياً وأجب عنه</p><button onclick="alert('السؤال: ما أهمية التعاون في العمل الجماعي؟')">سحب قصاصة</button></div>`,
+            18: `<div style="text-align:center; padding:50px;"><h1>📖 القراءة المشتركة</h1><p>اقرأ مع المعلم وحسّن نطقك</p><button onclick="alert('يقرأ المعلم نموذجاً، ثم يردد الطلاب')">بدء القراءة</button></div>`,
+            19: `<div style="text-align:center; padding:50px;"><h1>⚡ المزاوجة السريعة</h1><p>جد شريكاً وناقش السؤال المطروح</p><button onclick="alert('ابحث عن شريك خلال 30 ثانية')">بدء المزاوجة</button></div>`,
+            20: `<div style="text-align:center; padding:50px;"><h1>🎫 تذكرة الخروج</h1><p>أجب عن السؤالين قبل مغادرة الفصل</p><textarea rows="2" placeholder="ما أهم شيء تعلمته اليوم؟" style="width:80%; margin:10px;"></textarea><textarea rows="2" placeholder="ما السؤال الذي ما زال يدور في ذهنك؟" style="width:80%;"></textarea><button>تسليم التذكرة</button></div>`
+        };
+        return gamesHTML[gameId] || `<div style="text-align:center; padding:50px;"><h1>🎮 اللعبة قيد التطوير</h1><p>سيتم إضافة المحتوى الكامل قريباً</p></div>`;
+    }
+
+    function openGame(gameId) {
+        const game = games.find(g => g.id === gameId);
+        const gameHTML = getGameHTML(gameId);
+        const iframe = document.getElementById('gameIframe');
+        iframe.srcdoc = `
+            <html dir="rtl">
+            <head><meta charset="UTF-8"><style>body{font-family:'Segoe UI',Tahoma,sans-serif; margin:0; padding:20px;}</style></head>
+            <body>${gameHTML}</body>
+            </html>
+        `;
+        document.getElementById('gameModal').style.display = 'block';
+    }
+
+    function closeGame() {
+        document.getElementById('gameModal').style.display = 'none';
+        document.getElementById('gameIframe').srcdoc = '';
+    }
+
+    // ===================== تبديل الأقسام =====================
+    function showSection(section) {
+        const curriculumDiv = document.getElementById('curriculumSection');
+        const gamesDiv = document.getElementById('gamesSection');
+        const navBtns = document.querySelectorAll('.nav-btn');
+        
+        if (section === 'curriculum') {
+            curriculumDiv.style.display = 'block';
+            gamesDiv.style.display = 'none';
+            navBtns[0].classList.add('active');
+            navBtns[1].classList.remove('active');
+            renderTable();
+        } else {
+            curriculumDiv.style.display = 'none';
+            gamesDiv.style.display = 'block';
+            navBtns[0].classList.remove('active');
+            navBtns[1].classList.add('active');
+            renderGames();
+        }
+    }
+
+    // ===================== ربط الأحداث =====================
+    document.getElementById('gradeFilter').addEventListener('change', renderTable);
+    document.getElementById('semesterFilter').addEventListener('change', renderTable);
+    document.getElementById('typeFilter').addEventListener('change', renderTable);
+    document.getElementById('searchInput').addEventListener('input', renderTable);
+
+    // إغلاق النافذة المنبثقة عند الضغط خارجها
+    window.onclick = function(event) {
+        const modal = document.getElementById('gameModal');
+        if (event.target === modal) closeGame();
+    }
+
+    // التهيئة الأولية
+    renderTable();
+    renderGames();
+</script>
+</body>
+</html>

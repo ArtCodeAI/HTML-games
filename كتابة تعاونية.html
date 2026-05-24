@@ -1,0 +1,222 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🦅 الطائر الفراري - الكتابة التعاونية</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f39c12, #e67e22);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 25px;
+            max-width: 900px;
+            width: 100%;
+        }
+        h1 { text-align: center; color: #e67e22; }
+        .topic-box {
+            background: #f0f4f8;
+            border-radius: 20px;
+            padding: 15px;
+            margin: 15px 0;
+            text-align: center;
+        }
+        .groups-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .group-card {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 15px;
+            width: 280px;
+            border: 2px solid #e67e22;
+        }
+        .group-title {
+            background: #e67e22;
+            color: white;
+            padding: 8px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .group-content {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            min-height: 200px;
+            margin: 10px 0;
+            font-size: 14px;
+            line-height: 1.5;
+        }
+        .color-indicator {
+            display: inline-block;
+            width: 20px;
+            height: 20px;
+            border-radius: 5px;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+        .controls {
+            display: flex;
+            gap: 10px;
+            justify-content: center;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #e67e22;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .rotate-btn { background: #3498db; }
+        .reset-btn { background: #e74c3c; }
+        .phase-indicator {
+            text-align: center;
+            margin: 15px 0;
+            padding: 10px;
+            background: #ffe8d6;
+            border-radius: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🦅 الطائر الفراري</h1>
+    <p style="text-align: center;">كتابة تعاونية - كل مجموعة تكتب ثم تنتقل للمجموعة التالية للإضافة</p>
+    
+    <div class="topic-box">
+        <strong>📝 موضوع الكتابة:</strong>
+        <input type="text" id="topicInput" value="دور الشباب في بناء المجتمع" style="width: 60%; padding: 8px; border-radius: 20px; border:1px solid #ccc;">
+        <button onclick="setTopic()">تعيين</button>
+    </div>
+    
+    <div class="phase-indicator" id="phaseIndicator">
+        ⏰ المرحلة 1: الكتابة الأولى
+    </div>
+    
+    <div class="groups-container" id="groupsContainer"></div>
+    
+    <div class="controls">
+        <button class="rotate-btn" onclick="rotateGroups()">🔄 الطائر الفراري - انتقل إلى المجموعة التالية</button>
+        <button class="reset-btn" onclick="resetWriting()">🔄 إعادة تعيين الكل</button>
+    </div>
+</div>
+
+<script>
+    let groups = [
+        { name: "المجموعة 1", color: "#ff6b6b", content: "", contributions: 0 },
+        { name: "المجموعة 2", color: "#4ecdc4", content: "", contributions: 0 },
+        { name: "المجموعة 3", color: "#45b7d1", content: "", contributions: 0 },
+        { name: "المجموعة 4", color: "#96ceb4", content: "", contributions: 0 }
+    ];
+    let currentRound = 1;
+    let topic = "دور الشباب في بناء المجتمع";
+    let maxRounds = 4;
+    
+    function renderGroups() {
+        const container = document.getElementById('groupsContainer');
+        container.innerHTML = groups.map((group, idx) => `
+            <div class="group-card">
+                <div class="group-title">
+                    <span class="color-indicator" style="background:${group.color}"></span>
+                    ${group.name}
+                </div>
+                <div class="group-content" id="groupContent${idx}">
+                    ${group.content || "(لم يكتب بعد)"}
+                </div>
+                <textarea id="groupInput${idx}" rows="3" placeholder="أضف فقرتك..." style="width:100%; padding:8px; border-radius:10px; border:1px solid #ccc;"></textarea>
+                <button onclick="addToGroup(${idx})" style="margin-top:8px;">➕ إضافة</button>
+            </div>
+        `).join('');
+        
+        document.getElementById('phaseIndicator').innerHTML = `⏰ المرحلة ${currentRound} من ${maxRounds}: ${getPhaseMessage()}`;
+    }
+    
+    function getPhaseMessage() {
+        if (currentRound === 1) return "الكتابة الأولى - ابدأ بكتابة فقرتك";
+        if (currentRound === maxRounds) return "المرحلة الأخيرة - أكمل النص وأضف الخاتمة";
+        return `الدورة ${currentRound} - أضف إلى ما كتبته المجموعة السابقة`;
+    }
+    
+    function addToGroup(groupIndex) {
+        const input = document.getElementById(`groupInput${groupIndex}`);
+        const newText = input.value.trim();
+        if (newText === "") {
+            alert("الرجاء كتابة نص للإضافة.");
+            return;
+        }
+        
+        // إضافة النص مع لون المجموعة الحالي
+        const colorName = groups[groupIndex].name;
+        const colorHex = groups[groupIndex].color;
+        const addition = `\n\n<span style="background:${colorHex}20; padding:5px; border-radius:10px; display:inline-block;">✍️ ${colorName}: ${newText}</span>`;
+        
+        groups[groupIndex].content = (groups[groupIndex].content || "") + addition;
+        groups[groupIndex].contributions++;
+        
+        // مسح حقل الإدخال
+        input.value = "";
+        renderGroups();
+        
+        // التحقق من اكتمال الجولة
+        if (groups.every(g => g.contributions >= currentRound)) {
+            if (currentRound < maxRounds) {
+                alert(`✅ اكتملت المرحلة ${currentRound}! انتقل إلى المرحلة التالية.`);
+            } else {
+                alert("🎉 اكتمل النص التعاوني! يمكن عرض النتائج.");
+            }
+        }
+    }
+    
+    function rotateGroups() {
+        if (currentRound >= maxRounds) {
+            alert("🎉 لقد اكتملت جميع المراحل! يمكنك عرض النص النهائي لكل مجموعة.");
+            return;
+        }
+        
+        // التحقق من أن جميع المجموعات أكملت مساهماتها في هذه الجولة
+        const allContributed = groups.every(g => g.contributions >= currentRound);
+        if (!allContributed) {
+            alert(`⚠️ لم تكتمل مساهمات جميع المجموعات في المرحلة ${currentRound}. انتظر حتى يكتب الجميع.`);
+            return;
+        }
+        
+        currentRound++;
+        renderGroups();
+    }
+    
+    function setTopic() {
+        const newTopic = document.getElementById('topicInput').value.trim();
+        if (newTopic) {
+            topic = newTopic;
+            resetWriting();
+        }
+    }
+    
+    function resetWriting() {
+        groups = groups.map(g => ({ ...g, content: "", contributions: 0 }));
+        currentRound = 1;
+        renderGroups();
+    }
+    
+    renderGroups();
+</script>
+</body>
+</html>

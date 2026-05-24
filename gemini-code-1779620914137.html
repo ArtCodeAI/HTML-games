@@ -1,0 +1,424 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صائد الجمل المغناطيسي - Cyber Magnet</title>
+    <style>
+        :root {
+            --neon-blue: #00f0ff;
+            --neon-pink: #ff007f;
+            --neon-green: #39ff14;
+            --neon-yellow: #ffe600;
+            --background: #06060e;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--background);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 500px;
+            margin: 30px auto;
+            background: radial-gradient(circle, #101026 0%, #05050d 100%);
+            border: 3px solid var(--neon-pink);
+            box-shadow: 0 0 25px rgba(255, 0, 127, 0.2);
+            overflow: hidden;
+            border-radius: 16px;
+        }
+
+        /* HUD & Mission Control */
+        #hud {
+            display: flex;
+            justify-content: space-between;
+            padding: 12px 20px;
+            font-size: 1.1rem;
+            background: rgba(0, 0, 0, 0.5);
+            border-bottom: 2px solid rgba(255, 0, 127, 0.2);
+        }
+
+        #mission-panel {
+            text-align: center;
+            background: rgba(0, 240, 255, 0.1);
+            padding: 10px;
+            font-size: 1.3rem;
+            font-weight: bold;
+            color: var(--neon-blue);
+            border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+        }
+
+        #current-sentence-build {
+            display: flex;
+            justify-content: center;
+            gap: 10px;
+            margin-top: 5px;
+            min-height: 35px;
+        }
+
+        .built-word {
+            background: var(--neon-blue);
+            color: black;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 1rem;
+            font-weight: bold;
+            box-shadow: 0 0 8px var(--neon-blue);
+            animation: popIn 0.2s ease-out;
+        }
+
+        /* Player Ship with Cargo/Magnet Train */
+        #player-ship {
+            position: absolute;
+            bottom: 30px;
+            left: 365px; /* (800/2) - (70/2) */
+            width: 70px;
+            height: 45px;
+            background: var(--neon-pink);
+            border: 2px solid white;
+            border-radius: 8px;
+            box-shadow: 0 0 15px var(--neon-pink);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.5rem;
+            z-index: 50;
+        }
+        #player-ship::before {
+            content: '🛸';
+        }
+
+        /* Floating Word Debris */
+        .debris {
+            position: absolute;
+            padding: 8px 16px;
+            background: rgba(6, 6, 14, 0.85);
+            border: 2px solid var(--neon-green);
+            border-radius: 20px;
+            color: white;
+            font-weight: bold;
+            font-size: 1.1rem;
+            box-shadow: 0 0 10px rgba(57, 255, 20, 0.3);
+            white-space: nowrap;
+            cursor: pointer;
+        }
+
+        /* Starfield Background Effect */
+        .star {
+            position: absolute;
+            background: white;
+            border-radius: 50%;
+            opacity: 0.3;
+        }
+
+        /* Overlays */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(5, 5, 13, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .btn {
+            background: transparent;
+            color: var(--neon-pink);
+            border: 2px solid var(--neon-pink);
+            padding: 12px 35px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-top: 25px;
+            box-shadow: 0 0 12px rgba(255, 0, 127, 0.2);
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--neon-pink);
+            color: white;
+            box-shadow: 0 0 25px var(--neon-pink);
+        }
+
+        .hidden { display: none !important; }
+        
+        @keyframes popIn {
+            0% { transform: scale(0); }
+            100% { transform: scale(1); }
+        }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <div id="hud">
+            <div id="score-display">المجموع: 0 نقطة</div>
+            <div id="lives-display">طاقة الدرع: 🔋🔋🔋</div>
+        </div>
+
+        <div id="mission-panel">
+            المهمة: التقط الكلمات بترتيب صحيح لتكوين: <span style="color: var(--neon-yellow);" id="target-rule-text">جملة شرطية</span>
+            <div id="current-sentence-build"></div>
+        </div>
+
+        <div id="player-ship"></div>
+
+        <div id="start-screen" class="screen">
+            <h1 style="color: var(--neon-blue); text-shadow: 0 0 15px var(--neon-blue);">🚀 صائد الجمل المغناطيسي</h1>
+            <p style="text-align: center; max-width: 500px; line-height: 1.6;">
+                تحرك يميناً ويساراً بالفأرة (Mouse) أو باللمس لجذب الكلمات العائمة. التقط الكلمات بالترتيب الصحيح لتكوين الجمل المطلوبة قبل أن تصطدم بالخردة الفضائية!
+            </p>
+            <button class="btn" onclick="startGame()">تشغيل المحركات</button>
+        </div>
+
+        <div id="game-over-screen" class="screen hidden">
+            <h1 style="color: var(--neon-pink); text-shadow: 0 0 15px var(--neon-pink);">انتهت طاقة المركبة! 💥</h1>
+            <p id="final-score">النقاط التي جمعتها: 0</p>
+            <button class="btn" onclick="startGame()">إعادة تشغيل المحرك</button>
+        </div>
+    </div>
+
+    <script>
+        // Core game configuration parameters
+        const CONTAINER_WIDTH = 800;
+        const CONTAINER_HEIGHT = 500;
+        const SHIP_WIDTH = 70;
+        const FALL_SPEED_MIN = 1.5;
+        const FALL_SPEED_MAX = 3.5;
+
+        // Content Database: Focuses on Sentence Composition & Mechanics (Qatar Curriculum Style)
+        const missions = [
+            {
+                rule: "جملة شرطية",
+                sequence: ["إنْ", "تدرسْ", "تنجحْ"],
+                distractors: ["هذا", "الذي", "في", "المدرسة"]
+            },
+            {
+                rule: "جملة مبدوءة بفعل معتل",
+                sequence: ["قالَ", "المعلمُ", "الحقَّ"],
+                distractors: ["أخذَ", "كتبَ", "جلسَ", "الطالبُ"]
+            },
+            {
+                rule: "جملة تشتمل على اسم من الأسماء الخمسة (مرفوع)",
+                sequence: ["حضرَ", "أبوكَ", "الحفلَ"],
+                distractors: ["أبي", "أباك", "أبيك", "محمدٌ"]
+            },
+            {
+                rule: "جملة تشتمل على مفعول لأجله",
+                sequence: ["ذاكرتُ", "رغبةً", "في", "النجاحِ"],
+                distractors: ["طلباً", "سريعاً", "الدرسَ", "مجدّاً"]
+            }
+        ];
+
+        // Engine properties
+        let shipX = 365;
+        let score = 0;
+        let lives = 3;
+        let gameActive = false;
+        let currentMission = null;
+        let trackingIndex = 0; // Tracks which index in sequence is the next target
+        let activeDebris = [];
+        let debrisSpawnTimer = 0;
+
+        // Visual properties
+        const container = document.getElementById('game-container');
+        const ship = document.getElementById('player-ship');
+        const buildContainer = document.getElementById('current-sentence-build');
+        const scoreDisplay = document.getElementById('score-display');
+        const livesDisplay = document.getElementById('lives-display');
+        const targetRuleText = document.getElementById('target-rule-text');
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const finalScore = document.getElementById('final-score');
+
+        // Capture Mouse / Touch Movement across container horizon lines
+        container.addEventListener('mousemove', (e) => {
+            if (!gameActive) return;
+            const rect = container.getBoundingClientRect();
+            const mouseX = e.clientX - rect.left;
+            
+            // Lock ship boundaries smoothly inside window frame spaces
+            shipX = mouseX - (SHIP_WIDTH / 2);
+            if (shipX < 0) shipX = 0;
+            if (shipX > CONTAINER_WIDTH - SHIP_WIDTH) shipX = CONTAINER_WIDTH - SHIP_WIDTH;
+            
+            ship.style.left = shipX + 'px';
+        });
+
+        // Setup ambient dynamic scrolling starscape background
+        function buildStarfield() {
+            for (let i = 0; i < 40; i++) {
+                const star = document.createElement('div');
+                star.className = 'star';
+                star.style.width = Math.random() * 3 + 'px';
+                star.style.height = star.style.width;
+                star.style.top = Math.random() * CONTAINER_HEIGHT + 'px';
+                star.style.left = Math.random() * CONTAINER_WIDTH + 'px';
+                container.appendChild(star);
+            }
+        }
+
+        function startGame() {
+            score = 0;
+            lives = 3;
+            gameActive = true;
+            activeDebris.forEach(d => d.element.remove());
+            activeDebris = [];
+            debrisSpawnTimer = 0;
+            
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            
+            updateHUD();
+            loadNextMission();
+            requestAnimationFrame(engineLoop);
+        }
+
+        function loadNextMission() {
+            currentMission = missions[Math.floor(Math.random() * missions.length)];
+            trackingIndex = 0;
+            targetRuleText.innerText = currentMission.rule;
+            buildContainer.innerHTML = ''; // Wipe existing constructed array view
+            spawnMissionDebrisBatch();
+        }
+
+        function spawnDebris(text, isTarget) {
+            const el = document.createElement('div');
+            el.className = 'debris';
+            el.innerText = text;
+            
+            // Generate random spawn parameters safely avoiding overlap anomalies
+            const x = Math.random() * (CONTAINER_WIDTH - 120);
+            const y = -40; // Spawn perfectly off-screen top
+            const speed = Math.random() * (FALL_SPEED_MAX - FALL_SPEED_MIN) + FALL_SPEED_MIN;
+
+            el.style.left = x + 'px';
+            el.style.top = y + 'px';
+            
+            // Adjust glowing board border styles to mimic clean look vs unstable trash item
+            if (!isTarget) {
+                el.style.borderColor = 'var(--neon-yellow)';
+                el.style.boxShadow = '0 0 10px rgba(255, 230, 0, 0.2)';
+            }
+
+            container.appendChild(el);
+
+            activeDebris.push({
+                element: el,
+                text: text,
+                x: x,
+                y: y,
+                speed: speed,
+                isTarget: isTarget,
+                width: el.offsetWidth || 100 // Dynamic parsing fail fallback
+            });
+        }
+
+        function spawnMissionDebrisBatch() {
+            // Push active sequence items
+            currentMission.sequence.forEach(word => spawnDebris(word, true));
+            // Push distractor items
+            currentMission.distractors.forEach(word => spawnDebris(word, false));
+        }
+
+        function engineLoop() {
+            if (!gameActive) return;
+
+            // Handle periodic respawning loops if list shrinks too thin
+            if (activeDebris.length < 4) {
+                spawnMissionDebrisBatch();
+            }
+
+            // Loop and translate coordinates downwards across vertical plane matrix
+            for (let i = activeDebris.length - 1; i >= 0; i--) {
+                let item = activeDebris[i];
+                item.y += item.speed;
+                item.element.style.top = item.y + 'px';
+
+                // Basic 2D AABB bounding overlap matrix conditions
+                // Target bounding baseline coordinate check (Ship collision array line)
+                if (item.y >= 410 && item.y <= 455) {
+                    // Check horizontal profile convergence intersections
+                    if (item.x + item.width >= shipX && item.x <= shipX + SHIP_WIDTH) {
+                        evaluateCollision(item, i);
+                        continue;
+                    }
+                }
+
+                // Clear object memory maps once passing below the container baseline threshold bounds
+                if (item.y > CONTAINER_HEIGHT) {
+                    item.element.remove();
+                    activeDebris.splice(i, 1);
+                }
+            }
+
+            requestAnimationFrame(engineLoop);
+        }
+
+        function evaluateCollision(item, index) {
+            // Check if captured word explicitly aligns with tracking sequence
+            const expectedWord = currentMission.sequence[trackingIndex];
+
+            if (item.text === expectedWord) {
+                // Correct target magnet lock captured!
+                trackingIndex++;
+                score += 15;
+                
+                // Render into structural view train display
+                const log = document.createElement('div');
+                log.className = 'built-word';
+                log.innerText = item.text;
+                buildContainer.appendChild(log);
+
+                // Check if full targeted sequence arrangement is complete
+                if (trackingIndex === currentMission.sequence.length) {
+                    score += 50; // Completion payload bonus
+                    setTimeout(loadNextMission, 600);
+                }
+            } else {
+                // Wrong sequence arrangement or hit an actual bad distractor word node
+                lives--;
+                ship.style.background = 'var(--neon-yellow)';
+                setTimeout(() => ship.style.background = 'var(--neon-pink)', 250);
+            }
+
+            updateHUD();
+            
+            // Erase collision object node
+            item.element.remove();
+            activeDebris.splice(index, 1);
+
+            if (lives <= 0) {
+                endGame();
+            }
+        }
+
+        function updateHUD() {
+            scoreDisplay.innerText = `المجموع: ${score} نقطة`;
+            livesDisplay.innerText = `طاقة الدرع: ${'🔋'.repeat(lives)}`;
+        }
+
+        function endGame() {
+            gameActive = false;
+            finalScore.innerText = `النقاط التي جمعتها: ${score}`;
+            gameOverScreen.classList.remove('hidden');
+        }
+
+        // Initialize frame setups on window startup
+        buildStarfield();
+    </script>
+</body>
+</html>

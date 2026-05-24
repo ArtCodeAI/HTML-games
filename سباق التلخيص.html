@@ -1,0 +1,201 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>⏱️ سباق التلخيص - Summarization Race</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 25px;
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 { text-align: center; color: #1e3c72; }
+        .text-box {
+            background: #f0f4f8;
+            padding: 20px;
+            border-radius: 20px;
+            margin: 20px 0;
+            font-size: 16px;
+            line-height: 1.6;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .summary-area {
+            margin: 20px 0;
+        }
+        textarea {
+            width: 100%;
+            padding: 15px;
+            border-radius: 15px;
+            border: 2px solid #ccc;
+            font-size: 16px;
+            font-family: inherit;
+            resize: vertical;
+        }
+        .timer {
+            text-align: center;
+            font-size: 48px;
+            font-weight: bold;
+            color: #e74c3c;
+            margin: 15px 0;
+        }
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 12px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .reset-btn { background: #e74c3c; }
+        .results {
+            margin-top: 20px;
+            padding: 15px;
+            background: #d5f5e3;
+            border-radius: 15px;
+        }
+        .score {
+            font-size: 18px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>⏱️ سباق التلخيص</h1>
+    <p style="text-align: center;">اقرأ النص ثم لخصه في دقيقة واحدة!</p>
+    
+    <div class="text-box" id="originalText">
+        <strong>📖 النص المطلوب تلخيصه:</strong><br>
+        اللغة العربية من أقدم اللغات وأكثرها انتشارًا في العالم. يتحدث بها أكثر من 400 مليون نسمة كلغة أم،
+        وتعد لغة القرآن الكريم، مما يمنحها مكانة خاصة لدى المسلمين. تتميز العربية بثرائها اللغوي وقدرتها
+        على التعبير عن المعاني الدقيقة، ولها نظام صرفي ونحوي فريد. احتضنت العربية حضارات عظيمة وساهمت
+        في نقل العلوم والفلسفة إلى أوروبا خلال العصور الوسطى.
+    </div>
+    
+    <div class="timer" id="timer">01:00</div>
+    
+    <div class="summary-area">
+        <textarea id="summaryInput" rows="5" placeholder="اكتب خلاصتك هنا..." disabled></textarea>
+    </div>
+    
+    <div class="buttons">
+        <button id="startBtn" onclick="startRace()">🏁 ابدأ السباق</button>
+        <button id="submitBtn" onclick="submitSummary()" disabled>📤 تقديم الخلاصة</button>
+        <button class="reset-btn" onclick="resetRace()">🔄 إعادة تعيين</button>
+    </div>
+    
+    <div class="results" id="results" style="display: none;">
+        <div class="score" id="scoreMessage"></div>
+        <div id="feedback"></div>
+    </div>
+</div>
+
+<script>
+    let timerInterval = null;
+    let timeLeft = 60;
+    let raceActive = false;
+    
+    const idealSummary = "اللغة العربية لغة قديمة وعالمية، يتحدث بها ملايين الناس، وهي لغة القرآن الكريم، تتميز بثرائها ونظامها الفريد، وساهمت في نقل العلوم والحضارة.";
+    
+    function updateTimerDisplay() {
+        const minutes = Math.floor(timeLeft / 60);
+        const seconds = timeLeft % 60;
+        document.getElementById('timer').innerHTML = `${minutes.toString().padStart(2, '0')}:${seconds.toString().padStart(2, '0')}`;
+        if (timeLeft <= 0) {
+            clearInterval(timerInterval);
+            raceActive = false;
+            document.getElementById('summaryInput').disabled = true;
+            document.getElementById('submitBtn').disabled = true;
+            document.getElementById('startBtn').disabled = false;
+            document.getElementById('results').style.display = 'block';
+            document.getElementById('scoreMessage').innerHTML = "⏰ انتهى الوقت! لم يتم تقديم خلاصة.";
+        }
+    }
+    
+    function startRace() {
+        resetRace();
+        raceActive = true;
+        timeLeft = 60;
+        updateTimerDisplay();
+        document.getElementById('summaryInput').disabled = false;
+        document.getElementById('summaryInput').value = "";
+        document.getElementById('submitBtn').disabled = false;
+        document.getElementById('startBtn').disabled = true;
+        document.getElementById('results').style.display = 'none';
+        
+        timerInterval = setInterval(() => {
+            if (timeLeft > 0) {
+                timeLeft--;
+                updateTimerDisplay();
+            } else {
+                clearInterval(timerInterval);
+            }
+        }, 1000);
+    }
+    
+    function submitSummary() {
+        if (!raceActive) return;
+        clearInterval(timerInterval);
+        const summary = document.getElementById('summaryInput').value.trim();
+        raceActive = false;
+        document.getElementById('summaryInput').disabled = true;
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('startBtn').disabled = false;
+        
+        // تقييم بسيط
+        let score = 0;
+        const keywords = ["اللغة العربية", "القرآن", "ثراء", "حضارة", "علوم"];
+        keywords.forEach(kw => {
+            if (summary.includes(kw)) score += 20;
+        });
+        if (summary.length > 30) score += 10;
+        if (score > 100) score = 100;
+        
+        document.getElementById('results').style.display = 'block';
+        document.getElementById('scoreMessage').innerHTML = `🎯 خلاصتك: "${summary || 'لا توجد خلاصة'}"<br>🏆 النقاط: ${score}/100`;
+        
+        let feedback = "";
+        if (score >= 80) feedback = "⭐ ممتاز! خلاصة مركزة ودقيقة.";
+        else if (score >= 50) feedback = "👍 جيد، لكن يمكن تحسين الدقة والشمولية.";
+        else feedback = "📚 حاول مرة أخرى. ركز على الأفكار الرئيسية فقط.";
+        document.getElementById('feedback').innerHTML = feedback;
+    }
+    
+    function resetRace() {
+        if (timerInterval) clearInterval(timerInterval);
+        raceActive = false;
+        timeLeft = 60;
+        updateTimerDisplay();
+        document.getElementById('summaryInput').value = "";
+        document.getElementById('summaryInput').disabled = true;
+        document.getElementById('submitBtn').disabled = true;
+        document.getElementById('startBtn').disabled = false;
+        document.getElementById('results').style.display = 'none';
+    }
+    
+    resetRace();
+</script>
+</body>
+</html>

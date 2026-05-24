@@ -1,0 +1,207 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🌳 شجرة الأفكار - Tree Map</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 25px;
+            max-width: 1000px;
+            width: 100%;
+        }
+        h1 { text-align: center; color: #2c3e66; }
+        .tree-container {
+            text-align: center;
+            margin: 20px 0;
+        }
+        .root {
+            background: #2c3e66;
+            color: white;
+            padding: 15px 25px;
+            border-radius: 50px;
+            display: inline-block;
+            font-size: 20px;
+            font-weight: bold;
+            margin-bottom: 30px;
+        }
+        .branches {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            flex-wrap: wrap;
+        }
+        .branch {
+            background: #f0f4f8;
+            border-radius: 20px;
+            width: 220px;
+            min-height: 200px;
+        }
+        .branch-title {
+            background: #3498db;
+            color: white;
+            padding: 10px;
+            border-radius: 15px 15px 0 0;
+            font-weight: bold;
+        }
+        .sub-branches {
+            padding: 10px;
+        }
+        .sub-item {
+            background: white;
+            border-radius: 10px;
+            padding: 8px;
+            margin: 8px 0;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+        .add-sub {
+            display: flex;
+            gap: 5px;
+            margin-top: 10px;
+        }
+        input {
+            flex: 1;
+            padding: 5px;
+            border-radius: 15px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 5px 10px;
+            border-radius: 15px;
+            cursor: pointer;
+        }
+        .add-branch-btn {
+            background: #27ae60;
+            margin: 20px auto;
+            display: block;
+            padding: 10px 20px;
+        }
+        .main-topic {
+            margin: 20px 0;
+            text-align: center;
+        }
+        input.main-input {
+            width: 300px;
+            padding: 10px;
+            font-size: 16px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🌳 شجرة الأفكار</h1>
+    <p style="text-align: center;">نظّم الأفكار الرئيسة والفرعية</p>
+    
+    <div class="main-topic">
+        <input type="text" id="rootTopic" value="اللغة العربية" class="main-input">
+        <button onclick="setRootTopic()">تغيير الموضوع الرئيسي</button>
+    </div>
+    
+    <div class="tree-container">
+        <div class="root" id="rootDisplay">اللغة العربية</div>
+        <div class="branches" id="branchesContainer"></div>
+        <button class="add-branch-btn" onclick="addBranch()">➕ إضافة فكرة رئيسية جديدة</button>
+    </div>
+</div>
+
+<script>
+    let rootTopic = "اللغة العربية";
+    let branches = [
+        { title: "المهارات اللغوية", subItems: ["القراءة", "الكتابة", "التحدث", "الاستماع"] },
+        { title: "فروع اللغة", subItems: ["النحو", "الصرف", "البلاغة", "الإملاء"] },
+        { title: "النصوص الأدبية", subItems: ["الشعر", "النثر", "المقال", "القصة"] }
+    ];
+    
+    function renderTree() {
+        document.getElementById('rootDisplay').innerHTML = rootTopic;
+        const container = document.getElementById('branchesContainer');
+        container.innerHTML = branches.map((branch, idx) => `
+            <div class="branch">
+                <div class="branch-title">
+                    <input type="text" value="${branch.title}" onchange="updateBranchTitle(${idx}, this.value)" style="width:100%; background:transparent; color:white; border:none; text-align:center;">
+                </div>
+                <div class="sub-branches" id="subBranches_${idx}">
+                    ${branch.subItems.map((item, subIdx) => `
+                        <div class="sub-item">
+                            <span>📌 ${item}</span>
+                            <button onclick="removeSubItem(${idx}, ${subIdx})" style="background:#e74c3c;">✖</button>
+                        </div>
+                    `).join('')}
+                    <div class="add-sub">
+                        <input type="text" id="newSub_${idx}" placeholder="فكرة فرعية جديدة...">
+                        <button onclick="addSubItem(${idx})">➕</button>
+                    </div>
+                </div>
+                <button onclick="removeBranch(${idx})" style="background:#e74c3c; margin:10px auto; display:block;">🗑️ حذف هذه الفكرة</button>
+            </div>
+        `).join('');
+    }
+    
+    function setRootTopic() {
+        const newTopic = document.getElementById('rootTopic').value.trim();
+        if (newTopic) {
+            rootTopic = newTopic;
+            renderTree();
+        }
+    }
+    
+    function addBranch() {
+        const newBranchName = prompt("أدخل عنوان الفكرة الرئيسية الجديدة:");
+        if (newBranchName) {
+            branches.push({ title: newBranchName, subItems: [] });
+            renderTree();
+        }
+    }
+    
+    function updateBranchTitle(index, newTitle) {
+        if (newTitle.trim()) {
+            branches[index].title = newTitle;
+            renderTree();
+        }
+    }
+    
+    function addSubItem(branchIndex) {
+        const input = document.getElementById(`newSub_${branchIndex}`);
+        const newSub = input.value.trim();
+        if (newSub) {
+            branches[branchIndex].subItems.push(newSub);
+            input.value = "";
+            renderTree();
+        }
+    }
+    
+    function removeSubItem(branchIndex, subIndex) {
+        branches[branchIndex].subItems.splice(subIndex, 1);
+        renderTree();
+    }
+    
+    function removeBranch(branchIndex) {
+        if (confirm("هل تريد حذف هذه الفكرة الرئيسية وجميع فروعها؟")) {
+            branches.splice(branchIndex, 1);
+            renderTree();
+        }
+    }
+    
+    renderTree();
+</script>
+</body>
+</html>

@@ -1,0 +1,370 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>منجم المعرفة - Knowledge Mine</title>
+    <style>
+        :root {
+            --neon-blue: #00f0ff;
+            --neon-pink: #ff007f;
+            --neon-green: #39ff14;
+            --background: #0a0a12;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: var(--background);
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 400px;
+            margin: 50px auto;
+            background: linear-gradient(180deg, #141423 0%, #0d0d1a 100%);
+            border: 3px solid var(--neon-blue);
+            box-shadow: 0 0 20px rgba(0, 240, 255, 0.3);
+            overflow: hidden;
+            border-radius: 12px;
+        }
+
+        /* UI Overlay */
+        #hud {
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            text-shadow: 0 0 5px rgba(255, 255, 255, 0.5);
+            background: rgba(0, 0, 0, 0.4);
+            border-bottom: 1px solid rgba(0, 240, 255, 0.2);
+        }
+
+        #prompt-container {
+            text-align: center;
+            padding: 10px;
+            font-size: 1.4rem;
+            color: var(--neon-blue);
+            font-weight: bold;
+            text-shadow: 0 0 10px rgba(0, 240, 255, 0.5);
+        }
+
+        #prompt-target {
+            color: #fff;
+            background: var(--neon-pink);
+            padding: 2px 12px;
+            border-radius: 6px;
+            margin-right: 8px;
+            display: inline-block;
+        }
+
+        /* 3 Lanes Layout */
+        .lane-line {
+            position: absolute;
+            left: 0;
+            width: 100%;
+            height: 2px;
+            background: rgba(0, 240, 255, 0.15);
+            box-shadow: 0 0 8px rgba(0, 240, 255, 0.1);
+        }
+        #line1 { top: 180px; }
+        #line2 { top: 290px; }
+
+        /* Minecart (Player) */
+        #player {
+            position: absolute;
+            left: 650px; /* Locked position on horizontal axis */
+            width: 70px;
+            height: 50px;
+            background: #ffaa00;
+            border: 2px solid #fff;
+            border-radius: 8px;
+            box-shadow: 0 0 15px #ffaa00;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-weight: bold;
+            font-size: 1.5rem;
+            transition: top 0.15s ease-out;
+            z-index: 10;
+        }
+        #player::after {
+            content: '🛒';
+        }
+
+        /* Gates (Obstacles) */
+        .gate {
+            position: absolute;
+            left: -150px; /* Starts off-screen on the left */
+            width: 120px;
+            height: 70px;
+            background: rgba(13, 13, 26, 0.9);
+            border: 3px solid var(--neon-green);
+            border-radius: 8px;
+            box-shadow: 0 0 15px rgba(57, 255, 20, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 1.1rem;
+            font-weight: bold;
+            color: white;
+            transition: border-color 0.2s;
+        }
+
+        /* Screen States */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 10, 18, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        .btn {
+            background: transparent;
+            color: var(--neon-blue);
+            border: 2px solid var(--neon-blue);
+            padding: 12px 30px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 6px;
+            margin-top: 20px;
+            box-shadow: 0 0 10px rgba(0, 240, 255, 0.2);
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--neon-blue);
+            color: #000;
+            box-shadow: 0 0 20px var(--neon-blue);
+        }
+
+        .hidden { display: none !important; }
+        #game-over-screen { color: var(--neon-pink); }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- HUD -->
+        <div id="hud">
+            <div id="score-display">النقاط: 0</div>
+            <div id="lives-display">المحاولات: ❤️❤️❤️</div>
+        </div>
+
+        <div id="prompt-container">
+            هرباً من الخطر، اسلك مسار: <span id="prompt-target">الاسم الموصول</span>
+        </div>
+
+        <!-- Visual Lanes Separation -->
+        <div class="lane-line" id="line1"></div>
+        <div class="lane-line" id="line2"></div>
+
+        <!-- Player -->
+        <div id="player"></div>
+
+        <!-- Screens -->
+        <div id="start-screen" class="screen">
+            <h1>🚂 هروب من منجم المعرفة</h1>
+            <p>تحكم بالعربة باستخدام الأسهم (بالأعلى / بالأسفل) واصطدم بالبوابة الصحيحة!</p>
+            <button class="btn" onclick="startGame()">ابدأ المغامرة</button>
+        </div>
+
+        <div id="game-over-screen" class="screen hidden">
+            <h1>تحطمت العربة! 💥</h1>
+            <p id="final-score">النتيجة النهائية: 0</p>
+            <button class="btn" onclick="startGame()">إعادة المحاولة</button>
+        </div>
+    </div>
+
+    <script>
+        // Game Constants & Parameters
+        const LANE_Y = [105, 205, 305]; // Y positions matching the visual lanes
+        const BASE_SPEED = 4;
+        const SPEED_INCREMENT = 0.5;
+
+        // Dataset matching Qatar Grade 7 (Unit 3: Types of Knowledge)
+        const database = [
+            { type: "الاسم الموصول", options: ["الذين", "هذا", "أنت"] },
+            { type: "اسم الإشارة", options: ["هؤلاء", "التي", "نحن"] },
+            { type: "الضمير المتصل", options: ["كتابي (الياء)", "هو", "الذان"] },
+            { type: "الضمير المنفصل", options: ["إياك", "درستُ (التاء)", "اللواتي"] }
+        ];
+
+        // Game State Variables
+        let currentLane = 1; // Start in middle lane
+        let score = 0;
+        let lives = 3;
+        let gameSpeed = BASE_SPEED;
+        let gameActive = false;
+        let currentPrompt = {};
+        let activeGates = [];
+        let spawnTimer = 0;
+
+        // DOM elements
+        const player = document.getElementById('player');
+        const scoreDisplay = document.getElementById('score-display');
+        const livesDisplay = document.getElementById('lives-display');
+        const promptTarget = document.getElementById('prompt-target');
+        const startScreen = document.getElementById('start-screen');
+        const gameOverScreen = document.getElementById('game-over-screen');
+        const finalScore = document.getElementById('final-score');
+        const container = document.getElementById('game-container');
+
+        // Input Controls listeners
+        document.addEventListener('keydown', (e) => {
+            if (!gameActive) return;
+            if (e.key === 'ArrowUp' && currentLane > 0) {
+                currentLane--;
+            } else if (e.key === 'ArrowDown' && currentLane < 2) {
+                currentLane++;
+            }
+            updatePlayerPosition();
+        });
+
+        function updatePlayerPosition() {
+            player.style.top = LANE_Y[currentLane] + 'px';
+        }
+
+        function startGame() {
+            // Reset states
+            score = 0;
+            lives = 3;
+            gameSpeed = BASE_SPEED;
+            activeGates.forEach(g => g.element.remove());
+            activeGates = [];
+            spawnTimer = 0;
+            currentLane = 1;
+            
+            updatePlayerPosition();
+            updateHUD();
+            nextRound();
+
+            startScreen.classList.add('hidden');
+            gameOverScreen.classList.add('hidden');
+            gameActive = true;
+
+            // Kick off game loop
+            requestAnimationFrame(gameLoop);
+        }
+
+        function nextRound() {
+            // Pick a random grammar category as the target prompt
+            currentPrompt = database[Math.floor(Math.random() * database.length)];
+            promptTarget.innerText = currentPrompt.type;
+            spawnGates();
+        }
+
+        function spawnGates() {
+            // Shuffle the track lanes array so correct answers populate random lanes
+            let lanes = [0, 1, 2].sort(() => Math.random() - 0.5);
+            
+            // Configuration payload for correct answer gate
+            createGateElement(lanes[0], currentPrompt.options[0], true);
+            // Configuration payloads for wrong distractor gates
+            createGateElement(lanes[1], currentPrompt.options[1], false);
+            createGateElement(lanes[2], currentPrompt.options[2], false);
+        }
+
+        function createGateElement(laneIndex, text, isCorrect) {
+            const el = document.createElement('div');
+            el.className = 'gate';
+            el.innerText = text;
+            el.style.top = (LANE_Y[laneIndex] - 10) + 'px'; // Center roughly inside the lane layout
+            container.appendChild(el);
+
+            activeGates.push({
+                element: el,
+                x: -150, // Start off-screen right (moving to left dynamically based on RTL setup layout)
+                lane: laneIndex,
+                isCorrect: isCorrect
+            });
+        }
+
+        // Standard 60 FPS Delta Loop logic
+        function gameLoop() {
+            if (!gameActive) return;
+
+            // Iterate backwards through elements safely to clear/move active gates
+            for (let i = activeGates.length - 1; i >= 0; i--) {
+                let gate = activeGates[i];
+                gate.x += gameSpeed; // Moves gate along standard X vector values
+                gate.element.style.left = gate.x + 'px';
+
+                // Check for Collision with player cart
+                // The cart is statically anchored horizontally at x = 650
+                if (gate.x >= 580 && gate.x <= 660) {
+                    if (gate.lane === currentLane) {
+                        handleCollision(gate.isCorrect);
+                        clearCurrentGates();
+                        break;
+                    }
+                }
+
+                // Safely sweep gates that exit past screen space bounds
+                if (gate.x > 850) {
+                    gate.element.remove();
+                    activeGates.splice(i, 1);
+                    
+                    // If all elements pass without collision selection, launch fallback trigger loop
+                    if (activeGates.length === 0) {
+                        nextRound();
+                    }
+                }
+            }
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function handleCollision(isCorrect) {
+            if (isCorrect) {
+                score += 10;
+                // Gently ramp up speed to steadily heighten tension mechanics 
+                gameSpeed += SPEED_INCREMENT;
+            } else {
+                lives--;
+                // Flash player red briefly for negative visual feedback
+                player.style.background = 'var(--neon-pink)';
+                setTimeout(() => player.style.background = '#ffaa00', 200);
+            }
+
+            updateHUD();
+
+            if (lives <= 0) {
+                endGame();
+            } else {
+                nextRound();
+            }
+        }
+
+        function clearCurrentGates() {
+            activeGates.forEach(g => g.element.remove());
+            activeGates = [];
+        }
+
+        function updateHUD() {
+            scoreDisplay.innerText = `النقاط: ${score}`;
+            livesDisplay.innerText = `المحاولات: ${'❤️'.repeat(lives)}`;
+        }
+
+        function endGame() {
+            gameActive = false;
+            finalScore.innerText = `النتيجة النهائية: ${score}`;
+            gameOverScreen.classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

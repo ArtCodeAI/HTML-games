@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🍦 أعواد المثلجات - اختيار عشوائي للطلاب</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            max-width: 600px;
+            width: 100%;
+            text-align: center;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #667eea;
+        }
+        .students-list {
+            background: #f0f4f8;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+            max-height: 250px;
+            overflow-y: auto;
+        }
+        .student-item {
+            display: inline-block;
+            background: white;
+            padding: 8px 15px;
+            margin: 5px;
+            border-radius: 20px;
+            box-shadow: 0 2px 5px rgba(0,0,0,0.1);
+        }
+        .stick-container {
+            background: #ffe0b2;
+            border-radius: 30px;
+            padding: 30px;
+            margin: 20px 0;
+            cursor: pointer;
+            transition: 0.3s;
+            position: relative;
+        }
+        .stick-container:hover {
+            background: #ffcc80;
+            transform: scale(1.02);
+        }
+        .stick {
+            font-size: 60px;
+            animation: shake 0.2s infinite;
+        }
+        @keyframes shake {
+            0%, 100% { transform: rotate(0deg); }
+            25% { transform: rotate(10deg); }
+            75% { transform: rotate(-10deg); }
+        }
+        .selected-student {
+            font-size: 28px;
+            font-weight: bold;
+            color: #e91e63;
+            margin: 20px 0;
+            padding: 15px;
+            background: #fce4ec;
+            border-radius: 20px;
+        }
+        .draw-btn {
+            background: #667eea;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            margin: 10px;
+        }
+        .add-student {
+            display: flex;
+            gap: 10px;
+            margin-top: 20px;
+        }
+        input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 20px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background: #4caf50;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 20px;
+            cursor: pointer;
+        }
+        .reset-btn {
+            background: #ff9800;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🍦 أعواد المثلجات</h1>
+    <p>اسحب عودًا عشوائيًا لاختيار طالب للإجابة</p>
+    
+    <div class="students-list" id="studentsList">
+        <!-- ستظهر أسماء الطلاب هنا -->
+    </div>
+    
+    <div class="stick-container" onclick="drawStudent()">
+        <div class="stick">🍦🥢</div>
+        <div style="margin-top: 10px; font-size: 14px; color: #666;">اضغط هنا لسحب عود</div>
+    </div>
+    
+    <div class="selected-student" id="selectedStudent">
+        ✨ الطالب المختار: — ✨
+    </div>
+    
+    <button class="draw-btn" onclick="drawStudent()">🎲 سحب عشوائي</button>
+    <button class="draw-btn reset-btn" onclick="resetSticks()">🔄 إعادة الكل</button>
+    
+    <div class="add-student">
+        <input type="text" id="newStudentName" placeholder="اسم الطالب الجديد">
+        <button onclick="addStudent()">➕ إضافة طالب</button>
+    </div>
+</div>
+
+<script>
+    let students = [];
+    
+    // تحميل الأسماء من التخزين المحلي أو قائمة افتراضية
+    function loadStudents() {
+        const saved = localStorage.getItem('popsicleStudents');
+        if (saved) {
+            students = JSON.parse(saved);
+        } else {
+            students = [
+                "أحمد", "محمد", "فاطمة", "نورا", "عبد الله",
+                "سارة", "خالد", "مريم", "عمر", "ليلى"
+            ];
+        }
+        updateDisplay();
+    }
+    
+    function saveStudents() {
+        localStorage.setItem('popsicleStudents', JSON.stringify(students));
+    }
+    
+    function updateDisplay() {
+        const container = document.getElementById('studentsList');
+        container.innerHTML = students.map(name => `<div class="student-item">${name}</div>`).join('');
+        saveStudents();
+    }
+    
+    function drawStudent() {
+        if (students.length === 0) {
+            document.getElementById('selectedStudent').innerHTML = "⚠️ لا يوجد طلاب! أضف طلابًا أولاً.";
+            return;
+        }
+        const randomIndex = Math.floor(Math.random() * students.length);
+        const selected = students[randomIndex];
+        document.getElementById('selectedStudent').innerHTML = `✨ الطالب المختار: <span style="color:#e91e63">${selected}</span> ✨`;
+        
+        // تأثير اهتزاز
+        const stickDiv = document.querySelector('.stick-container');
+        stickDiv.style.transform = 'scale(0.95)';
+        setTimeout(() => { stickDiv.style.transform = ''; }, 200);
+    }
+    
+    function addStudent() {
+        const input = document.getElementById('newStudentName');
+        const name = input.value.trim();
+        if (name === "") {
+            alert("الرجاء إدخال اسم الطالب");
+            return;
+        }
+        students.push(name);
+        updateDisplay();
+        input.value = "";
+    }
+    
+    function resetSticks() {
+        if (confirm("هل تريد حذف جميع أسماء الطلاب وإعادة القائمة الافتراضية؟")) {
+            students = ["أحمد", "محمد", "فاطمة", "نورا", "عبد الله", "سارة", "خالد", "مريم", "عمر", "ليلى"];
+            updateDisplay();
+            document.getElementById('selectedStudent').innerHTML = "✨ الطالب المختار: — ✨";
+        }
+    }
+    
+    loadStudents();
+</script>
+</body>
+</html>

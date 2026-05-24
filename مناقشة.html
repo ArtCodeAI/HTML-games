@@ -1,0 +1,187 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎭 تمثيل الأدوار - Role Play</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #f093fb 0%, #f5576c 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 25px;
+            max-width: 800px;
+            width: 100%;
+        }
+        h1 { text-align: center; color: #c0392b; }
+        .roles-container {
+            display: flex;
+            gap: 15px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .role-card {
+            background: linear-gradient(145deg, #f8f9fa, #e9ecef);
+            border-radius: 20px;
+            padding: 20px;
+            width: 180px;
+            text-align: center;
+            cursor: pointer;
+            transition: 0.3s;
+            border: 2px solid transparent;
+        }
+        .role-card.selected {
+            border-color: #c0392b;
+            background: #fdebd0;
+            transform: scale(1.05);
+        }
+        .role-icon { font-size: 50px; }
+        .role-name { font-weight: bold; margin: 10px 0; }
+        .scene-box {
+            background: #f0f4f8;
+            border-radius: 20px;
+            padding: 20px;
+            margin: 20px 0;
+        }
+        .dialogue {
+            background: white;
+            border-radius: 15px;
+            padding: 15px;
+            margin: 10px 0;
+        }
+        .character-line {
+            font-weight: bold;
+            color: #2c3e50;
+        }
+        textarea {
+            width: 100%;
+            padding: 10px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            margin: 10px 0;
+        }
+        button {
+            background: #c0392b;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+        .performance-area {
+            margin-top: 20px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🎭 تمثيل الأدوار</h1>
+    <p style="text-align: center;">اختر دورك، ثم قم بتمثيل المشهد</p>
+    
+    <div class="roles-container" id="rolesContainer">
+        <div class="role-card" data-role="معلم" onclick="selectRole('معلم')">
+            <div class="role-icon">👨‍🏫</div>
+            <div class="role-name">المعلم</div>
+        </div>
+        <div class="role-card" data-role="طالب" onclick="selectRole('طالب')">
+            <div class="role-icon">👩‍🎓</div>
+            <div class="role-name">الطالب</div>
+        </div>
+        <div class="role-card" data-role="مدير" onclick="selectRole('مدير')">
+            <div class="role-icon">👔</div>
+            <div class="role-name">مدير المدرسة</div>
+        </div>
+        <div class="role-card" data-role="ولي أمر" onclick="selectRole('ولي أمر')">
+            <div class="role-icon">👪</div>
+            <div class="role-name">ولي أمر</div>
+        </div>
+    </div>
+    
+    <div class="scene-box">
+        <strong>🎬 المشهد: مناقشة حول تحسين العملية التعليمية</strong>
+        <div class="dialogue">
+            <div class="character-line">🗣️ المعلم:</div>
+            <div>"أقترح إدخال التكنولوجيا بشكل أكبر في الفصول الدراسية."</div>
+        </div>
+        <div class="dialogue">
+            <div class="character-line">🗣️ الطالب:</div>
+            <div>"نحن الطلاب نفضل التعلم التفاعلي والأنشطة الجماعية."</div>
+        </div>
+        <div class="dialogue">
+            <div class="character-line">🗣️ المدير:</div>
+            <div>"سأعمل على توفير الأجهزة اللوحية للفصول."</div>
+        </div>
+        <div class="dialogue">
+            <div class="character-line">🗣️ ولي الأمر:</div>
+            <div>"أدعم أي تطوير يحسن مستوى أبنائي التعليمي."</div>
+        </div>
+    </div>
+    
+    <div class="performance-area">
+        <strong>🎭 دورك الحالي: <span id="selectedRole">لم يتم الاختيار</span></strong>
+        <textarea id="performanceText" rows="3" placeholder="اكتب ما ستقوله في دورك..."></textarea>
+        <button onclick="performRole()">🎬 أداء الدور</button>
+        <button onclick="resetRole()">🔄 إلغاء الاختيار</button>
+    </div>
+    
+    <div id="feedback" style="margin-top: 15px; padding: 10px; background: #d5f5e3; border-radius: 15px; display: none;"></div>
+</div>
+
+<script>
+    let currentRole = null;
+    
+    function selectRole(role) {
+        currentRole = role;
+        document.querySelectorAll('.role-card').forEach(card => {
+            if (card.getAttribute('data-role') === role) {
+                card.classList.add('selected');
+            } else {
+                card.classList.remove('selected');
+            }
+        });
+        document.getElementById('selectedRole').innerHTML = currentRole;
+        document.getElementById('performanceText').focus();
+    }
+    
+    function performRole() {
+        if (!currentRole) {
+            alert("الرجاء اختيار دور أولاً!");
+            return;
+        }
+        const text = document.getElementById('performanceText').value.trim();
+        if (text === "") {
+            alert("الرجاء كتابة ما ستقوله في دورك.");
+            return;
+        }
+        const feedback = document.getElementById('feedback');
+        feedback.style.display = 'block';
+        feedback.innerHTML = `<strong>🎭 تمثيل دور ${currentRole}:</strong><br>"${text}"<br><br>✅ أداء ممتاز! يمكن للطلاب الآخرين تقييم الأداء.`;
+        
+        // إضافة خيار تسجيل الأداء
+        if (confirm("هل تريد تسجيل هذا الأداء لمراجعته لاحقاً؟")) {
+            localStorage.setItem('lastRolePlay', JSON.stringify({ role: currentRole, text: text, date: new Date() }));
+            alert("تم حفظ الأداء.");
+        }
+    }
+    
+    function resetRole() {
+        currentRole = null;
+        document.querySelectorAll('.role-card').forEach(card => card.classList.remove('selected'));
+        document.getElementById('selectedRole').innerHTML = "لم يتم الاختيار";
+        document.getElementById('performanceText').value = "";
+        document.getElementById('feedback').style.display = 'none';
+    }
+</script>
+</body>
+</html>

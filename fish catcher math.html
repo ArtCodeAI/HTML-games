@@ -1,0 +1,398 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>صائد الأسماك الحركي - Arcade Fishing</title>
+    <style>
+        :root {
+            --neon-cyan: #00f0ff;
+            --neon-gold: #ffe600;
+            --neon-coral: #ff4a5a;
+            --sky-blue: #7cd6ff;
+            --deep-ocean: #0a1128;
+        }
+
+        body {
+            margin: 0;
+            padding: 0;
+            background-color: #050814;
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            color: white;
+            overflow: hidden;
+            user-select: none;
+        }
+
+        #game-container {
+            position: relative;
+            width: 800px;
+            height: 600px;
+            margin: 20px auto;
+            border: 3px solid var(--neon-cyan);
+            box-shadow: 0 0 25px rgba(0, 240, 255, 0.3);
+            border-radius: 16px;
+            overflow: hidden;
+        }
+
+        /* Canvas Mapping */
+        canvas {
+            display: block;
+            background: linear-gradient(180deg, var(--sky-blue) 0%, #1e5799 15%, var(--deep-ocean) 85%);
+        }
+
+        /* HUD Overlay */
+        #hud {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            box-sizing: border-box;
+            display: flex;
+            justify-content: space-between;
+            padding: 15px 25px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            background: rgba(0, 0, 0, 0.4);
+            border-bottom: 2px solid rgba(0, 240, 255, 0.2);
+            z-index: 10;
+        }
+
+        .hud-item span {
+            color: var(--neon-gold);
+            text-shadow: 0 0 8px var(--neon-gold);
+        }
+
+        /* User Screen UI overlays */
+        .screen {
+            position: absolute;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(10, 17, 40, 0.95);
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            z-index: 100;
+        }
+
+        h1 {
+            font-size: 2.5rem;
+            color: var(--neon-cyan);
+            text-shadow: 0 0 15px var(--neon-cyan);
+            margin-bottom: 10px;
+        }
+
+        .btn {
+            background: transparent;
+            color: var(--neon-cyan);
+            border: 2px solid var(--neon-cyan);
+            padding: 12px 35px;
+            font-size: 1.2rem;
+            font-weight: bold;
+            cursor: pointer;
+            border-radius: 8px;
+            margin-top: 25px;
+            box-shadow: 0 0 12px rgba(0, 240, 255, 0.2);
+            transition: 0.2s;
+        }
+
+        .btn:hover {
+            background: var(--neon-cyan);
+            color: #0a1128;
+            box-shadow: 0 0 25px var(--neon-cyan);
+        }
+
+        .hidden { display: none !important; }
+    </style>
+</head>
+<body>
+
+    <div id="game-container">
+        <!-- HUD Overlay Elements -->
+        <div id="hud">
+            <div class="hud-item">النقاط: <span id="score-display">0</span></div>
+            <div class="hud-item">الوقت المتبقي: <span id="time-display">60</span> ثانية</div>
+        </div>
+
+        <!-- Render Target Screen -->
+        <canvas id="gameCanvas" width="800" height="600"></canvas>
+
+        <!-- Start Screen Menu -->
+        <div id="start-screen" class="screen">
+            <h1>⚓ صائد الأسماك الحركي</h1>
+            <p>انتظر تباعد السنارة ثم اضغط على زر <strong>[ المسافة Spacebar ]</strong> لإطلاق الخطاف!</p>
+            <button class="btn" onclick="startGame()">ابدأ الصيد</button>
+        </div>
+
+        <!-- Game Over Screen Menu -->
+        <div id="game-over-screen" class="screen hidden">
+            <h1 style="color: var(--neon-coral); text-shadow: 0 0 15px var(--neon-coral);">انتهى الوقت! 🏁</h1>
+            <p style="font-size: 1.3rem;">مجموع النقاط التي حققتها: <span id="final-score" style="color:var(--neon-gold)">0</span></p>
+            <button class="btn" onclick="startGame()">العب مجدداً</button>
+        </div>
+    </div>
+
+    <script>
+        const canvas = document.getElementById('gameCanvas');
+        const ctx = canvas.getContext('ctx') ? canvas.getContext('ctx') : canvas.getContext('2d');
+
+        // Design Configuration Vectors
+        const BOAT_X = canvas.width / 2;
+        const BOAT_Y = 80; // Baseline height level for water split interface
+        const HOOK_ORIGIN_Y = BOAT_Y + 10;
+
+        // Mechanics parameters
+        let score = 0;
+        let timeLeft = 60;
+        let gameActive = false;
+        let gameTimer = null;
+
+        // Hook Object Coordinates & State Properties
+        let hook = {
+            angle: 0,
+            angleSpeed: 0.03,
+            maxAngle: Math.PI / 2.3, // Maximum swing arc threshold range limit
+            length: 40,
+            baseLength: 40,
+            speed: 0,
+            state: "swinging", // swinging, shooting, reeling
+            x: BOAT_X,
+            y: HOOK_ORIGIN_Y,
+            caughtFish: null
+        };
+
+        // Fish Entity Templates configuration arrays (Pool data management)
+        let fishes = [];
+        const fishTypes = [
+            { label: "🐠", radius: 15, points: 20, speed: 1.8, weight: 1 },
+            { label: "🐟", radius: 22, points: 40, speed: 1.2, weight: 1.5 },
+            { label: "🐡", radius: 28, points: 70, speed: 0.8, weight: 2.2 },
+            { label: "🦈", radius: 45, points: 150, speed: 0.4, weight: 4.5 } // The heavy Boss Shark
+        ];
+
+        // Capture Inputs Action Control
+        document.addEventListener('keydown', (e) => {
+            if (e.code === 'Space' && hook.state === "swinging" && gameActive) {
+                e.preventDefault();
+                hook.state = "shooting";
+                hook.speed = 7; // Downward baseline force projection speed vectors
+            }
+        });
+
+        function startGame() {
+            score = 0;
+            timeLeft = 60;
+            gameActive = true;
+            
+            // Reset state machine parameters safely
+            hook.state = "swinging";
+            hook.length = hook.baseLength;
+            hook.caughtFish = null;
+
+            // Spawn localized random arrays matching depth matrix setups
+            spawnInitialFishPool(8);
+
+            document.getElementById('start-screen').classList.add('hidden');
+            document.getElementById('game-over-screen').classList.add('hidden');
+            
+            updateHUD();
+
+            // Setup system clock updates tracking loop metrics
+            if (gameTimer) clearInterval(gameTimer);
+            gameTimer = setInterval(() => {
+                if (!gameActive) return;
+                timeLeft--;
+                updateHUD();
+                if (timeLeft <= 0) endGame();
+            }, 1000);
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function spawnInitialFishPool(count) {
+            fishes = [];
+            for (let i = 0; i < count; i++) {
+                spawnSingleRandomFish();
+            }
+        }
+
+        function spawnSingleRandomFish() {
+            const type = fishTypes[Math.floor(Math.random() * fishTypes.length)];
+            const direction = Math.random() > 0.5 ? 1 : -1;
+            
+            fishes.push({
+                x: direction === 1 ? -50 : canvas.width + 50,
+                y: Math.random() * (canvas.height - (BOAT_Y + 150)) + (BOAT_Y + 100),
+                type: type,
+                dir: direction,
+                speed: type.speed * (Math.random() * 0.4 + 0.8)
+            });
+        }
+
+        function gameLoop() {
+            if (!gameActive) return;
+
+            updatePhysics();
+            renderGraphics();
+
+            requestAnimationFrame(gameLoop);
+        }
+
+        function updatePhysics() {
+            // Update Background Entities Pools dynamically
+            if (fishes.length < 6) spawnSingleRandomFish();
+
+            fishes.forEach((fish, idx) => {
+                fish.x += fish.speed * fish.dir;
+                // Boundaries clear logic matrix routing sweeps
+                if ((fish.dir === 1 && fish.x > canvas.width + 100) || (fish.dir === -1 && fish.x < -100)) {
+                    fishes.splice(idx, 1);
+                }
+            });
+
+            // Update Hook State Machines Logic Paths
+            if (hook.state === "swinging") {
+                // Pendulum dynamics formula manipulation mapping sine transformations smoothly
+                hook.angle += hook.angleSpeed;
+                if (Math.abs(hook.angle) > hook.maxAngle) {
+                    hook.angleSpeed = -hook.angleSpeed; // Reverse arc swing projection direction
+                }
+                // Static spatial mapping vectors for collision hook tip alignments
+                hook.x = BOAT_X + Math.sin(hook.angle) * hook.length;
+                hook.y = HOOK_ORIGIN_Y + Math.cos(hook.angle) * hook.length;
+            } 
+            else if (hook.state === "shooting") {
+                hook.length += hook.speed;
+                hook.x = BOAT_X + Math.sin(hook.angle) * hook.length;
+                hook.y = HOOK_ORIGIN_Y + Math.cos(hook.angle) * hook.length;
+
+                // Wall bounds checks or bottom baseline threshold limit triggers
+                if (hook.x < 0 || hook.x > canvas.width || hook.y > canvas.height - 20) {
+                    hook.state = "reeling";
+                }
+
+                // AABB / Distance Matrix Collision calculations checks loop
+                for (let i = 0; i < fishes.length; i++) {
+                    let fish = fishes[i];
+                    let dist = Math.hypot(hook.x - fish.x, hook.y - fish.y);
+                    
+                    if (dist < fish.type.radius + 10) { // Overlap zone detected intersection match
+                        hook.state = "reeling";
+                        hook.caughtFish = fish;
+                        fishes.splice(i, 1); // Extract out of global active space array index
+                        break;
+                    }
+                }
+            } 
+            else if (hook.state === "reeling") {
+                // Determine retrieval rate metrics modified directly by payload target weight values
+                let retrievalSpeed = 5;
+                if (hook.caughtFish) {
+                    retrievalSpeed /= hook.caughtFish.type.weight;
+                }
+                
+                hook.length -= retrievalSpeed;
+                if (hook.length <= hook.baseLength) {
+                    hook.length = hook.baseLength;
+                    hook.state = "swinging";
+                    
+                    // Harvest point rewards upon safety line resets calculations processing
+                    if (hook.caughtFish) {
+                        score += hook.caughtFish.type.points;
+                        hook.caughtFish = null;
+                        updateHUD();
+                    }
+                }
+                hook.x = BOAT_X + Math.sin(hook.angle) * hook.length;
+                hook.y = HOOK_ORIGIN_Y + Math.cos(hook.angle) * hook.length;
+
+                // Sync payload positions parameters directly during retraction transitions lines
+                if (hook.caughtFish) {
+                    hook.caughtFish.x = hook.x;
+                    hook.caughtFish.y = hook.y + 10;
+                }
+            }
+        }
+
+        function renderGraphics() {
+            // Clear entire display region framework safely every dynamic cycle tick frame
+            ctx.clearRect(0, 0, canvas.width, canvas.height);
+
+            // Draw Sky/Water Interface split visualization backgrounds
+            ctx.fillStyle = "#ffe066"; // Warm sky tint
+            ctx.fillRect(0, 0, canvas.width, BOAT_Y);
+
+            // Draw Fishing Vessel platform details
+            ctx.fillStyle = "#8B5A2B";
+            ctx.beginPath();
+            ctx.arc(BOAT_X, BOAT_Y + 5, 35, 0, Math.PI, false);
+            ctx.fill();
+
+            // Draw Fisherman profile structure mapping
+            ctx.fillStyle = "#ffcc99";
+            ctx.beginPath();
+            ctx.arc(BOAT_X, BOAT_Y - 18, 10, 0, Math.PI * 2);
+            ctx.fill();
+
+            // Draw Line Line cord cable vectors paths connections
+            ctx.strokeStyle = hook.state === "shooting" ? "var(--neon-coral)" : "rgba(255,255,255,0.6)";
+            ctx.lineWidth = 2;
+            ctx.beginPath();
+            ctx.moveTo(BOAT_X, HOOK_ORIGIN_Y);
+            ctx.lineTo(hook.x, hook.y);
+            ctx.stroke();
+
+            // Draw Metallic Hook Tip designs shapes elements
+            ctx.strokeStyle = "#d1d5db";
+            ctx.lineWidth = 3;
+            ctx.beginPath();
+            ctx.arc(hook.x, hook.y, 8, 0, Math.PI, false);
+            ctx.stroke();
+
+            // Render Active Fishes swimming within boundaries
+            fishes.forEach(fish => renderFishEntity(fish));
+
+            // Render Attached Caught Payloads targets during recovery sequences states
+            if (hook.caughtFish) renderFishEntity(hook.caughtFish);
+        }
+
+        function renderFishEntity(fish) {
+            ctx.save();
+            ctx.font = `${fish.type.radius * 1.6}px Arial`;
+            ctx.textAlign = "center";
+            ctx.textBaseline = "middle";
+            
+            // Flip emoji rendering transformation vectors dynamically to reflect active target movement paths direction
+            ctx.translate(fish.x, fish.y);
+            if (fish.dir === 1) {
+                ctx.scale(-1, 1); // Flip horizonal profile mirror alignments matches
+            }
+            
+            ctx.fillText(fish.type.label, 0, 0);
+            ctx.restore();
+
+            // Debug hitbox indicators (Can render boundaries for prototyping adjustments if needed)
+            /*
+            ctx.strokeStyle = "rgba(0,255,0,0.3)";
+            ctx.beginPath();
+            ctx.arc(fish.x, fish.y, fish.type.radius, 0, Math.PI*2);
+            ctx.stroke();
+            */
+        }
+
+        function updateHUD() {
+            document.getElementById('score-display').innerText = score;
+            document.getElementById('time-display').innerText = timeLeft;
+        }
+
+        function endGame() {
+            gameActive = false;
+            clearInterval(gameTimer);
+            document.getElementById('final-score').innerText = score;
+            document.getElementById('game-over-screen').classList.remove('hidden');
+        }
+    </script>
+</body>
+</html>

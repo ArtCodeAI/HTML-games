@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>👥 الزميل المجاور - Neighbor Partner</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 25px;
+            max-width: 900px;
+            width: 100%;
+        }
+        h1 { text-align: center; color: #1e3c72; }
+        .question-area {
+            background: #f0f4f8;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .question-text {
+            font-size: 24px;
+            font-weight: bold;
+            color: #2c3e66;
+        }
+        .phases {
+            display: flex;
+            justify-content: space-between;
+            gap: 15px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+        .phase-card {
+            flex: 1;
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 20px;
+            text-align: center;
+            border: 2px solid #ddd;
+            transition: 0.3s;
+        }
+        .phase-card.active {
+            border-color: #1e3c72;
+            background: #e3f2fd;
+            transform: scale(1.02);
+        }
+        .phase-icon { font-size: 48px; margin-bottom: 10px; }
+        .phase-title { font-weight: bold; font-size: 18px; margin-bottom: 10px; }
+        .phase-desc { font-size: 14px; color: #666; }
+        textarea {
+            width: 100%;
+            padding: 12px;
+            border-radius: 15px;
+            border: 1px solid #ccc;
+            font-size: 16px;
+            resize: vertical;
+            margin: 10px 0;
+        }
+        .buttons {
+            display: flex;
+            gap: 15px;
+            justify-content: center;
+            margin: 20px 0;
+            flex-wrap: wrap;
+        }
+        button {
+            background: #1e3c72;
+            color: white;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+        }
+        .next-btn { background: #27ae60; }
+        .reset-btn { background: #e74c3c; }
+        .agreed-answer {
+            background: #d5f5e3;
+            padding: 15px;
+            border-radius: 15px;
+            margin-top: 15px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>👥 الزميل المجاور</h1>
+    <p style="text-align: center;">فكر - ناقش جارك - اتفقا على إجابة</p>
+    
+    <div class="question-area">
+        <div class="question-text" id="questionText">ما أهمية اللغة العربية في الحفاظ على الهوية؟</div>
+        <button onclick="changeQuestion()" style="background:#3498db; margin-top:10px;">🔄 تغيير السؤال</button>
+    </div>
+    
+    <div class="phases">
+        <div class="phase-card" id="phase1">
+            <div class="phase-icon">🤔</div>
+            <div class="phase-title">المرحلة 1: فكر بمفردك</div>
+            <div class="phase-desc">فكر في إجابتك الشخصية (دقيقة واحدة)</div>
+        </div>
+        <div class="phase-card" id="phase2">
+            <div class="phase-icon">💬</div>
+            <div class="phase-title">المرحلة 2: ناقش جارك</div>
+            <div class="phase-desc">ناقش إجابتك مع زميلك المجاور</div>
+        </div>
+        <div class="phase-card" id="phase3">
+            <div class="phase-icon">🤝</div>
+            <div class="phase-title">المرحلة 3: اتفقا على إجابة</div>
+            <div class="phase-desc">توصلوا إلى إجابة مشتركة</div>
+        </div>
+    </div>
+    
+    <div id="phaseContent">
+        <textarea id="answerInput" rows="4" placeholder="اكتب إجابتك هنا..."></textarea>
+    </div>
+    
+    <div class="buttons">
+        <button id="phaseBtn" onclick="nextPhase()">➡️ انتقل للمرحلة التالية</button>
+        <button class="reset-btn" onclick="resetActivity()">🔄 إعادة تعيين</button>
+    </div>
+    
+    <div id="agreedAnswer" style="display: none;" class="agreed-answer"></div>
+</div>
+
+<script>
+    let currentPhase = 1; // 1,2,3
+    let personalAnswer = "";
+    let partnerAnswer = "";
+    let agreedAnswer = "";
+    
+    const questionsList = [
+        "ما أهمية اللغة العربية في الحفاظ على الهوية؟",
+        "كيف يمكن للعلم أن يغير حياة الإنسان؟",
+        "ما دور الشباب في بناء المجتمع؟",
+        "كيف تؤثر وسائل التواصل الاجتماعي على العلاقات الأسرية؟"
+    ];
+    
+    function updatePhaseDisplay() {
+        document.querySelectorAll('.phase-card').forEach((card, idx) => {
+            if (idx + 1 === currentPhase) card.classList.add('active');
+            else card.classList.remove('active');
+        });
+        
+        const phaseBtn = document.getElementById('phaseBtn');
+        const answerInput = document.getElementById('answerInput');
+        const agreedDiv = document.getElementById('agreedAnswer');
+        
+        if (currentPhase === 1) {
+            phaseBtn.innerHTML = "➡️ انتقل لمناقشة الجار";
+            answerInput.placeholder = "اكتب إجابتك الشخصية هنا...";
+            answerInput.disabled = false;
+            agreedDiv.style.display = 'none';
+        } else if (currentPhase === 2) {
+            phaseBtn.innerHTML = "➡️ انتقل للاتفاق على إجابة";
+            answerInput.placeholder = "بعد مناقشة جارك، اكتب ملاحظاتك هنا...";
+            answerInput.disabled = false;
+            agreedDiv.style.display = 'none';
+        } else if (currentPhase === 3) {
+            phaseBtn.innerHTML = "✅ إنهاء وتسليم الإجابة المتفق عليها";
+            answerInput.placeholder = "اكتب الإجابة التي اتفقتما عليها...";
+            answerInput.disabled = false;
+            agreedDiv.style.display = 'none';
+        }
+    }
+    
+    function nextPhase() {
+        const answer = document.getElementById('answerInput').value.trim();
+        
+        if (currentPhase === 1) {
+            if (answer === "") {
+                alert("الرجاء كتابة إجابتك الشخصية أولاً.");
+                return;
+            }
+            personalAnswer = answer;
+            currentPhase = 2;
+            document.getElementById('answerInput').value = "";
+            updatePhaseDisplay();
+        }
+        else if (currentPhase === 2) {
+            if (answer === "") {
+                alert("الرجاء كتابة ملاحظاتك بعد مناقشة جارك.");
+                return;
+            }
+            partnerAnswer = answer;
+            currentPhase = 3;
+            document.getElementById('answerInput').value = "";
+            updatePhaseDisplay();
+        }
+        else if (currentPhase === 3) {
+            if (answer === "") {
+                alert("الرجاء كتابة الإجابة التي اتفقتما عليها.");
+                return;
+            }
+            agreedAnswer = answer;
+            document.getElementById('answerInput').disabled = true;
+            document.getElementById('agreedAnswer').style.display = 'block';
+            document.getElementById('agreedAnswer').innerHTML = `
+                <strong>✅ الإجابة المتفق عليها:</strong><br>
+                "${agreedAnswer}"<br><br>
+                <strong>📝 إجابتك الشخصية:</strong> ${personalAnswer}<br>
+                <strong>💬 ملاحظات المناقشة:</strong> ${partnerAnswer}
+            `;
+            alert("🎉 تم التوصل إلى إجابة مشتركة! أحسنتما.");
+        }
+    }
+    
+    function resetActivity() {
+        currentPhase = 1;
+        personalAnswer = "";
+        partnerAnswer = "";
+        agreedAnswer = "";
+        document.getElementById('answerInput').value = "";
+        document.getElementById('answerInput').disabled = false;
+        document.getElementById('agreedAnswer').style.display = 'none';
+        updatePhaseDisplay();
+    }
+    
+    function changeQuestion() {
+        const currentQ = document.getElementById('questionText').innerText;
+        const currentIndex = questionsList.indexOf(currentQ);
+        const nextIndex = (currentIndex + 1) % questionsList.length;
+        document.getElementById('questionText').innerHTML = questionsList[nextIndex];
+        resetActivity();
+    }
+    
+    updatePhaseDisplay();
+</script>
+</body>
+</html>

@@ -1,0 +1,147 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚪 الهروب من الغرفة الرقمية - تحديات لغوية</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', 'Amiri', sans-serif;
+            background: #0a0a1a;
+            min-height: 100vh;
+            padding: 20px;
+            color: #eee;
+        }
+        .container { max-width: 900px; margin: 0 auto; }
+        .room {
+            background: linear-gradient(135deg, #1a1a2e, #16213e);
+            border-radius: 40px;
+            padding: 30px;
+            text-align: center;
+            border: 2px solid #ffd966;
+        }
+        .door { font-size: 5rem; margin: 20px; }
+        .puzzle {
+            background: rgba(255,255,255,0.1);
+            border-radius: 30px;
+            padding: 25px;
+            margin: 20px 0;
+        }
+        .code-input {
+            width: 200px;
+            padding: 15px;
+            font-size: 1.5rem;
+            text-align: center;
+            border-radius: 20px;
+            border: none;
+            margin: 10px;
+        }
+        .hint {
+            background: #2a6e3a;
+            padding: 10px;
+            border-radius: 15px;
+            font-size: 0.9rem;
+        }
+        .progress-steps {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin-bottom: 25px;
+        }
+        .step { width: 40px; height: 40px; border-radius: 50%; background: #333; display: flex; align-items: center; justify-content: center; }
+        .step.completed { background: #ffd966; color: #1a1a2e; }
+        .success-msg { color: #ffd966; font-size: 1.2rem; margin-top: 20px; }
+    </style>
+</head>
+<body>
+<div class="container">
+    <div class="room">
+        <div class="door">🚪🔒</div>
+        <h2>الهروب من الغرفة الرقمية</h2>
+        <p>حل الألغاز اللغوية لفتح الأبواب والخروج!</p>
+        
+        <div class="progress-steps" id="steps">
+            <div class="step" id="step1">1</div>
+            <div class="step" id="step2">2</div>
+            <div class="step" id="step3">3</div>
+        </div>
+        
+        <!-- اللغز الأول: أناغرام -->
+        <div class="puzzle" id="puzzle1">
+            <h3>📜 اللغز الأول: فك الشفرة</h3>
+            <p>أعد ترتيب الحروف التالية لتكوين كلمة تعني "الليل المظلم":</p>
+            <p style="font-size:2rem; letter-spacing:10px;">ق س غ</p>
+            <input type="text" id="anagramAnswer" class="code-input" placeholder="أدخل الكلمة">
+            <button onclick="checkAnagram()" style="background:#ffd966; border:none; padding:10px 25px; border-radius:30px;">🔓 فتح</button>
+        </div>
+        
+        <!-- اللغز الثاني: الكلمة الشاذة -->
+        <div class="puzzle" id="puzzle2" style="display:none;">
+            <h3>🔢 اللغز الثاني: الكلمة الشاذة</h3>
+            <p>اختر الكلمة المختلفة لغويًا:</p>
+            <div style="display:flex; gap:15px; justify-content:center; flex-wrap:wrap;">
+                <button onclick="checkOdd('كتاب')" class="odd-option" style="background:#333; padding:15px 25px; border-radius:30px;">كتاب</button>
+                <button onclick="checkOdd('مكتبة')" class="odd-option" style="background:#333; padding:15px 25px; border-radius:30px;">مكتبة</button>
+                <button onclick="checkOdd('يقرأ')" class="odd-option" style="background:#333; padding:15px 25px; border-radius:30px;">يقرأ</button>
+                <button onclick="checkOdd('قلم')" class="odd-option" style="background:#333; padding:15px 25px; border-radius:30px;">قلم</button>
+            </div>
+        </div>
+        
+        <!-- اللغز الثالث: بيت الشعر -->
+        <div class="puzzle" id="puzzle3" style="display:none;">
+            <h3>📖 اللغز الثالث: أكمل البيت</h3>
+            <p style="font-size:1.2rem;">إذا الشعب يومًا أراد الحياة ...</p>
+            <input type="text" id="poemAnswer" class="code-input" placeholder="أكمل البيت">
+            <button onclick="checkPoem()" style="background:#ffd966; border:none; padding:10px 25px; border-radius:30px;">🚪 فتح الباب</button>
+        </div>
+        
+        <div id="escapeMessage" class="success-msg"></div>
+    </div>
+</div>
+
+<script>
+    let completed = [false, false, false];
+    
+    function checkAnagram() {
+        const answer = document.getElementById('anagramAnswer').value.trim();
+        if (answer === 'غسق') {
+            completed[0] = true;
+            document.getElementById('step1').classList.add('completed');
+            document.getElementById('puzzle1').style.display = 'none';
+            document.getElementById('puzzle2').style.display = 'block';
+            alert('✅ أحسنت! الكلمة الصحيحة "غسق" تعني ظلام الليل.');
+        } else {
+            alert('❌ حاول مرة أخرى! رتب الحروف: ق + س + غ');
+        }
+    }
+    
+    function checkOdd(choice) {
+        if (choice === 'يقرأ') {
+            completed[1] = true;
+            document.getElementById('step2').classList.add('completed');
+            document.getElementById('puzzle2').style.display = 'none';
+            document.getElementById('puzzle3').style.display = 'block';
+            alert('✅ صحيح! "يقرأ" فعل، بينما الباقي أسماء.');
+        } else {
+            alert('❌ ليس هذا! أي كلمة تختلف في نوعها (فعل / اسم)؟');
+        }
+    }
+    
+    function checkPoem() {
+        const answer = document.getElementById('poemAnswer').value.trim();
+        if (answer.includes('فلا بد أن يستجيب القدر') || answer.includes('فلا بد أن يستجيب القدر')) {
+            completed[2] = true;
+            document.getElementById('step3').classList.add('completed');
+            document.getElementById('puzzle3').style.display = 'none';
+            document.getElementById('escapeMessage').innerHTML = '🚪🎉 هربت بنجاح! 🎉🚪<br>لقد أتقنت المهارات اللغوية وفككت الشفرات!';
+        } else {
+            alert('❌ البيت الشهير للشاعر أبو القاسم الشابي: "فلا بد أن يستجيب القدر"');
+        }
+    }
+    
+    window.checkAnagram = checkAnagram;
+    window.checkOdd = checkOdd;
+    window.checkPoem = checkPoem;
+</script>
+</body>
+</html>

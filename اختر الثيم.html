@@ -1,0 +1,586 @@
+<!DOCTYPE html>
+<html lang="ar" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+    <title>🎮 اختر الإجابة الصحيحة - سدد الهدف | 13 ثيمًا تفاعليًا</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+
+        body {
+            font-family: 'Segoe UI', 'Tahoma', 'Amiri', 'Traditional Arabic', sans-serif;
+            background: linear-gradient(135deg, #1a472a 0%, #2d6a4f 100%);
+            min-height: 100vh;
+            padding: 20px;
+            transition: all 0.3s ease;
+        }
+
+        /* ==================== الثيمات الأساسية ==================== */
+        body.theme-football { background: linear-gradient(135deg, #1a5a2a 0%, #0d3a1f 100%); }
+        body.theme-football .game-card { background: linear-gradient(145deg, #fff9e6, #f0e6c8); border: 3px solid #ffd700; }
+        body.theme-football .score-display { background: #ffd700; color: #1a5a2a; }
+
+        body.theme-racing { background: linear-gradient(135deg, #2c2c2c 0%, #1a1a2e 100%); }
+        body.theme-racing .game-card { background: linear-gradient(145deg, #e8e8e8, #d0d0d0); border: 3px solid #e63946; }
+        body.theme-racing .score-display { background: #e63946; color: white; }
+
+        body.theme-aviation { background: linear-gradient(135deg, #1a6b8a 0%, #0d47a1 100%); }
+        body.theme-aviation .game-card { background: linear-gradient(145deg, #e0f0ff, #c0e0ff); border: 3px solid #ff8c00; }
+        body.theme-aviation .score-display { background: #ff8c00; color: white; }
+
+        body.theme-cooking { background: linear-gradient(135deg, #b5651d 0%, #8b4513 100%); }
+        body.theme-cooking .game-card { background: linear-gradient(145deg, #fff5e6, #ffe0cc); border: 3px solid #ff6347; }
+        body.theme-cooking .score-display { background: #ff6347; color: white; }
+
+        body.theme-space { background: linear-gradient(135deg, #0b0b2b 0%, #1a1a3e 100%); }
+        body.theme-space .game-card { background: linear-gradient(145deg, #1a1a3a, #0f0f2a); color: #00ffcc; border: 2px solid #00ffcc; }
+        body.theme-space .score-display { background: #00ffcc; color: #0b0b2b; }
+
+        body.theme-pirate { background: linear-gradient(135deg, #2d5a5a 0%, #1a3a3a 100%); }
+        body.theme-pirate .game-card { background: #f5e6c8; border: 5px solid #8b5a2b; box-shadow: 10px 10px 0 #4a2a1a; }
+
+        /* ==================== الثيمات الإضافية ==================== */
+        
+        /* 🏊 سباحة */
+        body.theme-swimming { background: linear-gradient(135deg, #0a4d8c 0%, #0288d1 100%); }
+        body.theme-swimming .game-card { background: linear-gradient(145deg, #e0f7fa, #b2ebf2); border: 3px solid #ffd600; border-radius: 20px; }
+        body.theme-swimming .score-display { background: #ffd600; color: #01579b; }
+
+        /* 🐎 خيول */
+        body.theme-horses { background: linear-gradient(135deg, #5d3a1a 0%, #8b5a2b 100%); }
+        body.theme-horses .game-card { background: linear-gradient(145deg, #f5e6d3, #e0c8a8); border: 3px solid #d4a017; }
+        body.theme-horses .score-display { background: #d4a017; color: #4a2a1a; }
+
+        /* 🎮 ألعاب فيديو */
+        body.theme-gaming { background: linear-gradient(135deg, #1a1a2e 0%, #16213e 100%); }
+        body.theme-gaming .game-card { background: linear-gradient(145deg, #2d3561, #1a1a3a); border: 3px solid #00ff00; }
+        body.theme-gaming .score-display { background: #00ff00; color: #0a0a2a; }
+
+        /* 🧙 سحر وفانتازيا */
+        body.theme-magic { background: linear-gradient(135deg, #2a0a4a 0%, #4a1a6a 100%); }
+        body.theme-magic .game-card { background: linear-gradient(145deg, #3a2a5a, #2a1a4a); border: 3px solid #ff69b4; color: #e0b0ff; }
+        body.theme-magic .score-display { background: #ff69b4; color: #2a0a4a; }
+
+        /* 🎨 فن ورسم */
+        body.theme-art { background: linear-gradient(135deg, #ec407a 0%, #ab47bc 100%); }
+        body.theme-art .game-card { background: linear-gradient(145deg, #fff9c4, #fff176); border: 3px solid #ff6e40; }
+        body.theme-art .score-display { background: #ff6e40; color: #4a148c; }
+
+        /* 🏀 كرة سلة */
+        body.theme-basketball { background: linear-gradient(135deg, #e65100 0%, #bf360c 100%); }
+        body.theme-basketball .game-card { background: linear-gradient(145deg, #ffe0b2, #ffcc80); border: 3px solid #ffb300; }
+        body.theme-basketball .score-display { background: #ffb300; color: #bf360c; }
+
+        /* 🎪 سيرك */
+        body.theme-circus { background: linear-gradient(135deg, #c62828 0%, #ad1457 100%); }
+        body.theme-circus .game-card { background: linear-gradient(145deg, #fff9c4, #fff59d); border: 5px dotted #ff4081; border-radius: 60px 30px 60px 30px; }
+        body.theme-circus .score-display { background: #ff4081; color: #c62828; }
+
+        .container {
+            max-width: 1300px;
+            margin: 0 auto;
+        }
+
+        .header {
+            text-align: center;
+            margin-bottom: 30px;
+        }
+
+        .header h1 {
+            font-size: 2rem;
+            margin-bottom: 10px;
+            color: #ffea9e;
+            text-shadow: 2px 2px 4px rgba(0,0,0,0.3);
+        }
+
+        .header p {
+            color: #eee;
+        }
+
+        /* اختيار الثيمات - صفوف منظمة */
+        .theme-selector {
+            display: flex;
+            flex-wrap: wrap;
+            justify-content: center;
+            gap: 10px;
+            margin-bottom: 25px;
+        }
+
+        .theme-btn {
+            padding: 10px 18px;
+            border: none;
+            border-radius: 50px;
+            font-size: 0.85rem;
+            font-weight: bold;
+            cursor: pointer;
+            transition: 0.2s;
+            font-family: inherit;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .theme-btn:hover {
+            transform: scale(1.05);
+            box-shadow: 0 5px 15px rgba(0,0,0,0.2);
+        }
+
+        /* ألوان أزرار الثيمات */
+        .theme-btn.football { background: #ffd700; color: #1a5a2a; }
+        .theme-btn.racing { background: #e63946; color: white; }
+        .theme-btn.aviation { background: #ff8c00; color: white; }
+        .theme-btn.cooking { background: #ff6347; color: white; }
+        .theme-btn.space { background: #00ffcc; color: #0b0b2b; }
+        .theme-btn.pirate { background: #8b5a2b; color: #f5e6c8; }
+        .theme-btn.swimming { background: #0288d1; color: white; }
+        .theme-btn.horses { background: #d4a017; color: #4a2a1a; }
+        .theme-btn.gaming { background: #00ff00; color: #1a1a2e; }
+        .theme-btn.magic { background: #9b59b6; color: white; }
+        .theme-btn.art { background: #ff6e40; color: white; }
+        .theme-btn.basketball { background: #ffb300; color: #bf360c; }
+        .theme-btn.circus { background: #ff4081; color: #c62828; }
+
+        /* بطاقة اللعبة */
+        .game-card {
+            background: white;
+            border-radius: 40px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.3);
+            transition: all 0.3s;
+        }
+
+        .score-panel {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 15px;
+            margin-bottom: 25px;
+            padding: 15px 20px;
+            background: rgba(0,0,0,0.1);
+            border-radius: 60px;
+        }
+
+        .score-display {
+            background: #d4a017;
+            padding: 8px 20px;
+            border-radius: 50px;
+            font-weight: bold;
+            font-size: 1.1rem;
+        }
+
+        .goal-animation {
+            animation: goalPulse 0.5s ease;
+        }
+
+        @keyframes goalPulse {
+            0% { transform: scale(1); }
+            50% { transform: scale(1.3); text-shadow: 0 0 20px gold; }
+            100% { transform: scale(1); }
+        }
+
+        @keyframes shake {
+            0%, 100% { transform: translateX(0); }
+            25% { transform: translateX(-10px); }
+            75% { transform: translateX(10px); }
+        }
+
+        .shake-animation {
+            animation: shake 0.3s ease;
+        }
+
+        .question-area {
+            background: rgba(0,0,0,0.05);
+            border-radius: 30px;
+            padding: 25px;
+            margin-bottom: 25px;
+            text-align: center;
+        }
+
+        .question-text {
+            font-size: 1.2rem;
+            font-weight: bold;
+            margin-bottom: 15px;
+            line-height: 1.6;
+        }
+
+        .options-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(250px, 1fr));
+            gap: 12px;
+            margin-bottom: 25px;
+        }
+
+        .option-btn {
+            background: white;
+            border: 2px solid #2a6e3a;
+            border-radius: 60px;
+            padding: 12px 18px;
+            font-size: 0.95rem;
+            font-family: inherit;
+            cursor: pointer;
+            transition: 0.2s;
+            text-align: right;
+        }
+
+        .option-btn:hover:not(.disabled) {
+            background: #2a6e3a;
+            color: white;
+            transform: translateX(-5px);
+        }
+
+        .option-btn.correct {
+            background: #28a745;
+            color: white;
+            border-color: #28a745;
+        }
+
+        .option-btn.wrong {
+            background: #dc3545;
+            color: white;
+            border-color: #dc3545;
+        }
+
+        .option-btn.disabled {
+            opacity: 0.6;
+            cursor: not-allowed;
+        }
+
+        .goal-area {
+            text-align: center;
+            margin: 20px 0;
+            padding: 20px;
+            background: rgba(0,0,0,0.08);
+            border-radius: 30px;
+            cursor: pointer;
+        }
+
+        .goal-icon {
+            font-size: 3.5rem;
+            cursor: pointer;
+            transition: 0.1s linear;
+            display: inline-block;
+        }
+
+        .goal-icon:active {
+            transform: scale(0.95);
+        }
+
+        .feedback-area {
+            text-align: center;
+            padding: 12px;
+            border-radius: 25px;
+            font-size: 1rem;
+            margin-top: 15px;
+            background: rgba(0,0,0,0.05);
+        }
+
+        .next-btn {
+            width: 100%;
+            padding: 14px;
+            background: #2a6e3a;
+            color: white;
+            border: none;
+            border-radius: 50px;
+            font-size: 1.1rem;
+            font-weight: bold;
+            cursor: pointer;
+            margin-top: 20px;
+            transition: 0.2s;
+        }
+
+        .next-btn:hover:not(:disabled) {
+            background: #1e4a2a;
+        }
+
+        .next-btn:disabled {
+            opacity: 0.5;
+            cursor: not-allowed;
+        }
+
+        .progress {
+            text-align: center;
+            margin-top: 15px;
+            color: #666;
+            font-size: 0.9rem;
+        }
+
+        footer {
+            text-align: center;
+            color: #ddd;
+            margin-top: 40px;
+            padding: 20px;
+            font-size: 0.9rem;
+        }
+
+        @media (max-width: 700px) {
+            .options-grid { grid-template-columns: 1fr; }
+            .question-text { font-size: 1rem; }
+            .theme-btn { padding: 6px 12px; font-size: 0.7rem; }
+            .score-display { font-size: 0.9rem; padding: 5px 12px; }
+        }
+    </style>
+</head>
+<body class="theme-football">
+<div class="container">
+    <div class="header">
+        <h1>🎮 اختر الإجابة الصحيحة - سدد الهدف!</h1>
+        <p>⭐ اختر ثيمك المفضل | أجب عن الأسئلة | سجل الأهداف واحصل على النقاط</p>
+    </div>
+
+    <!-- صفوف الثيمات -->
+    <div class="theme-selector">
+        <button class="theme-btn football" onclick="changeTheme('football')">⚽ كرة قدم</button>
+        <button class="theme-btn racing" onclick="changeTheme('racing')">🏎️ سيارات</button>
+        <button class="theme-btn aviation" onclick="changeTheme('aviation')">✈️ طائرات</button>
+        <button class="theme-btn cooking" onclick="changeTheme('cooking')">🍳 طبخ</button>
+        <button class="theme-btn space" onclick="changeTheme('space')">🚀 فضاء</button>
+        <button class="theme-btn pirate" onclick="changeTheme('pirate')">🏴‍☠️ قراصنة</button>
+    </div>
+    <div class="theme-selector">
+        <button class="theme-btn swimming" onclick="changeTheme('swimming')">🏊 سباحة</button>
+        <button class="theme-btn horses" onclick="changeTheme('horses')">🐎 خيول</button>
+        <button class="theme-btn gaming" onclick="changeTheme('gaming')">🎮 ألعاب فيديو</button>
+        <button class="theme-btn magic" onclick="changeTheme('magic')">🧙 سحر وفانتازيا</button>
+        <button class="theme-btn art" onclick="changeTheme('art')">🎨 فن ورسم</button>
+        <button class="theme-btn basketball" onclick="changeTheme('basketball')">🏀 كرة سلة</button>
+        <button class="theme-btn circus" onclick="changeTheme('circus')">🎪 سيرك</button>
+    </div>
+
+    <div class="game-card">
+        <div class="score-panel">
+            <div class="score-display" id="scoreDisplay">⭐ النقاط: 0</div>
+            <div class="score-display" id="goalsDisplay">🎯 الأهداف: 0</div>
+            <div class="score-display" id="questionCounter">📋 السؤال 1 / 20</div>
+        </div>
+
+        <div class="question-area">
+            <div class="question-text" id="questionText">اضغط على الهدف لبدء اللعبة</div>
+        </div>
+
+        <div class="options-grid" id="optionsContainer"></div>
+
+        <div class="goal-area" id="goalArea">
+            <div class="goal-icon" id="goalIcon" onclick="shootGoal()">
+                ⚽
+            </div>
+            <p style="margin-top: 8px; font-size: 0.85rem;">👆 اختر إجابة ثم اضغط هنا لتسجيل هدفك!</p>
+        </div>
+
+        <div class="feedback-area" id="feedbackArea">
+            💡 اختر إجابة من الخيارات، ثم اضغط على الهدف لتسجيل هدفك!
+        </div>
+
+        <button class="next-btn" id="nextBtn" onclick="loadNextQuestion()">➡️ السؤال التالي</button>
+        <div class="progress" id="progressText"></div>
+    </div>
+
+    <footer>
+        🏆 13 ثيمًا تفاعليًا | 20 سؤالاً من الإجابات النموذجية | كل إجابة صحيحة = هدف + 10 نقاط
+    </footer>
+</div>
+
+<script>
+    // ============================================================
+    // بنك الأسئلة (20 سؤالاً من الإجابات النموذجية)
+    // ============================================================
+    const questions = [
+        { text: "ما معنى كلمة (ارتوى) في سياق: 'ارتوى العلم من نبع حلقات كتابها'؟", options: ["أخذ واستقى / نهل العلم", "رفض العلم", "تجاهل المعرفة", "أعطى العلم"], correct: 0, explanation: "ارتوى يعني أخذ واستقى العلم" },
+        { text: "ما معنى كلمة (مولعًا) في الجملة: 'كنت مولعًا بقراءة الروايات'؟", options: ["محبًا / شديد التعلق", "كارهًا", "غافلاً", "مترددًا"], correct: 0, explanation: "مولعًا يعني محبًا بشدة" },
+        { text: "ما معنى الفعل (حنا) في قوله: 'حنا عليها حنو الوالد'؟", options: ["عطف / أشفق", "ضرب", "أهمل", "كره"], correct: 0, explanation: "حنا يعني عطف وأشفق" },
+        { text: "لماذا لقب الشيخ جاسم بـ 'أبو التعليم'؟", options: ["لنشأته على حب العلم وتوليه أول وزارة تعليم", "لكونه طبيبًا ماهرًا", "لكونه مهندسًا معماريًا", "لكونه تاجرًا ناجحًا"], correct: 0, explanation: "لقب بأبو التعليم لجهوده في تأسيس التعليم في قطر" },
+        { text: "ما العلوم التي تلقاها الشيخ جاسم في صغره؟", options: ["القرآن والحديث والسيرة والفقه", "الرياضيات فقط", "الفيزياء والكيمياء", "اللغات الأجنبية"], correct: 0, explanation: "تلقى علوم القرآن والحديث والسيرة والفقه" },
+        { text: "متى تم افتتاح مكتبة قطر الوطنية؟", options: ["16 إبريل 2018", "1 يناير 2020", "10 ديسمبر 2015", "5 مارس 2019"], correct: 0, explanation: "افتتحت مكتبة قطر الوطنية في 16 إبريل 2018" },
+        { text: "أين تقع مكتبة قطر الوطنية؟", options: ["في المدينة التعليمية", "في الدوحة القديمة", "في الوكرة", "في الخور"], correct: 0, explanation: "تقع مكتبة قطر الوطنية في المدينة التعليمية" },
+        { text: "كم تبلغ مساحة مبنى مكتبة قطر الوطنية؟", options: ["45000 متر مربع", "20000 متر مربع", "100000 متر مربع", "30000 متر مربع"], correct: 0, explanation: "مساحة المكتبة تقدر بـ 45000 متر مربع" },
+        { text: "ما أمنية بطل القصة في الوحدة الرابعة؟", options: ["أن يمتلك كأسًا واحدة من الماء", "أن يمتلك سيارة", "أن يسافر", "أن يصبح غنيًا"], correct: 0, explanation: "أمنيته كانت أن يمتلك كأسًا واحدة من الماء" },
+        { text: "ما معنى كلمة (لوع) في النص؟", options: ["حرقة / شوق شديد", "فرح", "حزن", "غضب"], correct: 0, explanation: "لوع تعني حرقة وشوق شديد" },
+        { text: "ما أركان الجملة الاسمية؟", options: ["المبتدأ والخبر", "الفعل والفاعل", "الفعل والمفعول", "الاسم والحرف"], correct: 0, explanation: "الجملة الاسمية تتكون من مبتدأ وخبر" },
+        { text: "ما أنواع الخبر في الجملة الاسمية؟", options: ["مفرد - جملة - شبه جملة", "ماضي - مضارع - أمر", "اسم - فعل - حرف", "مرفوع - منصوب - مجرور"], correct: 0, explanation: "الخبر أنواع: مفرد، جملة اسمية أو فعلية، شبه جملة" },
+        { text: "حدد نوع الخبر في: 'المعلم يحرص على سلامة طلبته'", options: ["جملة فعلية", "مفرد", "شبه جملة", "جملة اسمية"], correct: 0, explanation: "الخبر جملة فعلية (يحرص)" },
+        { text: "حدد نوع الخبر في: 'العصفور على الشجرة'", options: ["شبه جملة (جار ومجرور)", "مفرد", "جملة فعلية", "جملة اسمية"], correct: 0, explanation: "الخبر شبه جملة (جار ومجرور)" },
+        { text: "ما معنى كلمة (يمتطي) في قوله: 'يمتطي صهوة أول وزارة'؟", options: ["يعلو ظهر الدابة / يرتقي", "يهرب من", "يكسر", "يخاف"], correct: 0, explanation: "يمتطي يعني يعلو ويرتقي" },
+        { text: "ما جزاء من يحسن إلى الناس كما ورد في النصوص؟", options: ["كن معوانًا للناس يحبك الله", "سيعاقب", "سيُهمل", "سينسى"], correct: 0, explanation: "من يحسن إلى الناس يحبه الله" },
+        { text: "ما نوع الفعل في جملة: 'أمر الله عباده بطاعته'؟", options: ["فعل صحيح", "فعل معتل", "فعل ناقص", "فعل جامد"], correct: 0, explanation: "أمر فعل صحيح (أ، م، ر)" },
+        { text: "ما نوع الفعل في جملة: 'اقض حياتك في طاعة الله'؟", options: ["فعل معتل", "فعل صحيح", "فعل ناقص", "فعل مهموز"], correct: 0, explanation: "اقض فعل معتل (أصله قضي)" },
+        { text: "ما معنى العبارة: 'ترجل فارس التعليم عن عمر ناهز الستين عامًا'؟", options: ["توفي وكان عمره ستين عامًا", "سافر خارج البلاد", "اعتزل العمل", "حصل على جائزة"], correct: 0, explanation: "ترجل هنا كناية عن الوفاة" },
+        { text: "لماذا كتبت الهمزة على نبرة في كلمة 'جئت'؟", options: ["لسكونها وكسر ما قبلها", "لفتحها", "لضمها", "لوقوعها في أول الكلمة"], correct: 0, explanation: "الكسرة أقوى، فناسبها الياء" }
+    ];
+
+    // متغيرات اللعبة
+    let currentQuestionIndex = 0;
+    let score = 0;
+    let goals = 0;
+    let answered = false;
+    let selectedOption = -1;
+    let currentQuestionsList = [...questions];
+
+    // عناصر DOM
+    const questionText = document.getElementById('questionText');
+    const optionsContainer = document.getElementById('optionsContainer');
+    const scoreDisplay = document.getElementById('scoreDisplay');
+    const goalsDisplay = document.getElementById('goalsDisplay');
+    const questionCounter = document.getElementById('questionCounter');
+    const feedbackArea = document.getElementById('feedbackArea');
+    const nextBtn = document.getElementById('nextBtn');
+    const progressText = document.getElementById('progressText');
+    const goalIcon = document.getElementById('goalIcon');
+
+    // خريطة الثيمات مع الأيقونات والرسائل
+    const themeMap = {
+        football: { icon: "⚽", message: "سدد الكرة في المرمى!", color: "#ffd700" },
+        racing: { icon: "🏎️", message: "تجاوز خط النهاية!", color: "#e63946" },
+        aviation: { icon: "✈️", message: "أقلع بنجاح!", color: "#ff8c00" },
+        cooking: { icon: "🍳", message: "أعددت وجبة ناجحة!", color: "#ff6347" },
+        space: { icon: "🚀", message: "اهبط على سطح القمر!", color: "#00ffcc" },
+        pirate: { icon: "🏴‍☠️", message: "اعثر على الكنز!", color: "#8b5a2b" },
+        swimming: { icon: "🏊", message: "المس حافة المسبح!", color: "#0288d1" },
+        horses: { icon: "🐎", message: "تخط خط النهاية أولاً!", color: "#d4a017" },
+        gaming: { icon: "🎮", message: "اجمع النقاط الذهبية!", color: "#00ff00" },
+        magic: { icon: "🧙", message: "ألق التعويذة بنجاح!", color: "#9b59b6" },
+        art: { icon: "🎨", message: "أكمل التحفة الفنية!", color: "#ff6e40" },
+        basketball: { icon: "🏀", message: "سدد الكرة في السلة!", color: "#ffb300" },
+        circus: { icon: "🎪", message: "أكمل الخدعة البهلوانية!", color: "#ff4081" }
+    };
+
+    // تغيير الثيم
+    function changeTheme(theme) {
+        document.body.className = `theme-${theme}`;
+        const themeData = themeMap[theme];
+        if (themeData) {
+            goalIcon.innerHTML = themeData.icon;
+            feedbackArea.innerHTML = `🎪 ثيم ${getThemeName(theme)} | ${themeData.message} اختر إجابة ثم سدد!`;
+        } else {
+            goalIcon.innerHTML = "🎯";
+            feedbackArea.innerHTML = `🎮 ثيم جديد | اختر إجابة ثم سدد الهدف!`;
+        }
+    }
+
+    function getThemeName(theme) {
+        const names = {
+            football: "كرة قدم", racing: "السيارات", aviation: "الطائرات", cooking: "الطبخ",
+            space: "الفضاء", pirate: "القراصنة", swimming: "السباحة", horses: "الخيول",
+            gaming: "ألعاب الفيديو", magic: "السحر والفانتازيا", art: "الفن والرسم",
+            basketball: "كرة السلة", circus: "السيرك"
+        };
+        return names[theme] || theme;
+    }
+
+    // عرض السؤال الحالي
+    function displayCurrentQuestion() {
+        const q = currentQuestionsList[currentQuestionIndex];
+        questionText.innerHTML = `❓ ${q.text}`;
+        
+        optionsContainer.innerHTML = '';
+        q.options.forEach((opt, idx) => {
+            const btn = document.createElement('button');
+            btn.className = 'option-btn';
+            if (answered) {
+                if (idx === q.correct) btn.classList.add('correct');
+                if (idx === selectedOption && idx !== q.correct) btn.classList.add('wrong');
+                btn.classList.add('disabled');
+            }
+            btn.innerHTML = `${String.fromCharCode(65+idx)}. ${opt}`;
+            btn.onclick = () => !answered && selectOption(idx);
+            optionsContainer.appendChild(btn);
+        });
+        
+        questionCounter.innerHTML = `📋 السؤال ${currentQuestionIndex+1} / ${currentQuestionsList.length}`;
+        const percent = Math.round((currentQuestionIndex) / currentQuestionsList.length * 100);
+        progressText.innerHTML = `📊 التقدم: ${percent}%`;
+        
+        if (!answered) {
+            feedbackArea.innerHTML = feedbackArea.innerHTML.replace(/^(.*?)(?=اختر|👆|💡)/, "🔍 اختر إجابة، ثم اضغط على الهدف لتسجيل إجابتك!");
+        }
+    }
+
+    // اختيار خيار
+    function selectOption(optionIndex) {
+        if (answered) return;
+        selectedOption = optionIndex;
+        
+        const btns = document.querySelectorAll('.option-btn');
+        btns.forEach((btn, idx) => {
+            if (idx === optionIndex) {
+                btn.style.background = "#2a6e3a";
+                btn.style.color = "white";
+            }
+        });
+        
+        feedbackArea.innerHTML = `✅ لقد اخترت: "${currentQuestionsList[currentQuestionIndex].options[optionIndex]}"<br>👆 الآن اضغط على الهدف لتسجيل إجابتك!`;
+    }
+
+    // التهديف
+    function shootGoal() {
+        if (!answered && selectedOption !== -1) {
+            const q = currentQuestionsList[currentQuestionIndex];
+            const isCorrect = (selectedOption === q.correct);
+            
+            answered = true;
+            
+            if (isCorrect) {
+                score += 10;
+                goals++;
+                const theme = document.body.className.replace('theme-', '');
+                const goalMsg = themeMap[theme]?.message || "سجلت هدفًا!";
+                feedbackArea.innerHTML = `🎉🎯 ${goalMsg} إجابة صحيحة! +10 نقاط<br>📖 ${q.explanation}`;
+                
+                goalIcon.classList.add('goal-animation');
+                setTimeout(() => goalIcon.classList.remove('goal-animation'), 500);
+                
+                const scoreEl = document.getElementById('scoreDisplay');
+                scoreEl.style.transform = 'scale(1.1)';
+                setTimeout(() => scoreEl.style.transform = 'scale(1)', 200);
+            } else {
+                feedbackArea.innerHTML = `❌😓 أه! إجابة خاطئة! الإجابة الصحيحة هي: ${q.options[q.correct]}<br>📖 ${q.explanation}`;
+                
+                goalIcon.classList.add('shake-animation');
+                setTimeout(() => goalIcon.classList.remove('shake-animation'), 300);
+            }
+            
+            scoreDisplay.innerHTML = `⭐ النقاط: ${score}`;
+            goalsDisplay.innerHTML = `🎯 الأهداف: ${goals}`;
+            displayCurrentQuestion();
+            
+        } else if (selectedOption === -1) {
+            feedbackArea.innerHTML = "⚠️ اختر إجابة أولاً، ثم اضغط على الهدف!";
+        } else if (answered) {
+            feedbackArea.innerHTML = "⏩ لقد أجبت على هذا السؤال بالفعل! اضغط على 'السؤال التالي' للمتابعة.";
+        }
+    }
+
+    // السؤال التالي
+    function loadNextQuestion() {
+        if (!answered && selectedOption !== -1) {
+            feedbackArea.innerHTML = "⚠️ لم تسجل هدفك بعد! اضغط على الهدف أولاً.";
+            return;
+        }
+        
+        if (currentQuestionIndex + 1 < currentQuestionsList.length) {
+            currentQuestionIndex++;
+            answered = false;
+            selectedOption = -1;
+            displayCurrentQuestion();
+        } else {
+            const totalPossible = currentQuestionsList.length * 10;
+            feedbackArea.innerHTML = `🏆🎉 مبروك! لقد أكملت جميع الأسئلة! 🎉🏆<br>⭐ نقاطك: ${score} من ${totalPossible} | 🎯 الأهداف المسجلة: ${goals}<br>🔄 أعد تحميل الصفحة للعب مرة أخرى!`;
+            nextBtn.disabled = true;
+            nextBtn.style.opacity = "0.5";
+        }
+    }
+
+    // بدء اللعبة
+    displayCurrentQuestion();
+
+    // جعل الدوال عالمية
+    window.changeTheme = changeTheme;
+    window.shootGoal = shootGoal;
+    window.loadNextQuestion = loadNextQuestion;
+    window.selectOption = selectOption;
+</script>
+</body>
+</html>

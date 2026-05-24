@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🎲 مكعب الأسئلة - لعبة تفاعلية</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #1e3c72, #2a5298);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .game-container {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            text-align: center;
+            max-width: 600px;
+            width: 100%;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        h1 {
+            color: #1e3c72;
+            margin-bottom: 10px;
+        }
+        .subtitle {
+            color: #666;
+            margin-bottom: 30px;
+        }
+        .cube {
+            width: 200px;
+            height: 200px;
+            margin: 20px auto;
+            perspective: 800px;
+            cursor: pointer;
+        }
+        .cube-inner {
+            width: 100%;
+            height: 100%;
+            position: relative;
+            transform-style: preserve-3d;
+            transition: transform 0.8s cubic-bezier(0.4, 0.2, 0.2, 1);
+        }
+        .cube-face {
+            position: absolute;
+            width: 200px;
+            height: 200px;
+            background: linear-gradient(145deg, #ffd89b, #c7e9fb);
+            border: 3px solid #1e3c72;
+            border-radius: 20px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 70px;
+            font-weight: bold;
+            color: #1e3c72;
+            backface-visibility: visible;
+            box-shadow: inset 0 0 20px rgba(0,0,0,0.1);
+        }
+        .face1 { transform: rotateY(0deg) translateZ(100px); background: #ff6b6b; color: white; }
+        .face2 { transform: rotateY(90deg) translateZ(100px); background: #4ecdc4; color: white; }
+        .face3 { transform: rotateY(180deg) translateZ(100px); background: #45b7d1; color: white; }
+        .face4 { transform: rotateY(-90deg) translateZ(100px); background: #96ceb4; color: white; }
+        .face5 { transform: rotateX(90deg) translateZ(100px); background: #f9ca24; color: white; }
+        .face6 { transform: rotateX(-90deg) translateZ(100px); background: #e056fd; color: white; }
+        
+        @keyframes roll {
+            0% { transform: rotateX(0deg) rotateY(0deg); }
+            100% { transform: rotateX(720deg) rotateY(360deg); }
+        }
+        .rolling {
+            animation: roll 0.8s ease-out;
+        }
+        
+        .question-box {
+            margin-top: 30px;
+            padding: 20px;
+            background: #f0f4f8;
+            border-radius: 20px;
+        }
+        .question-number {
+            font-size: 18px;
+            color: #1e3c72;
+            font-weight: bold;
+        }
+        .question-text {
+            font-size: 22px;
+            font-weight: bold;
+            margin: 15px 0;
+            color: #2c3e66;
+        }
+        .roll-btn {
+            background: #1e3c72;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            font-size: 18px;
+            border-radius: 40px;
+            cursor: pointer;
+            margin: 20px 0;
+            transition: 0.3s;
+        }
+        .roll-btn:hover {
+            background: #2a5298;
+            transform: scale(1.02);
+        }
+        .questions-list {
+            text-align: right;
+            margin-top: 20px;
+            font-size: 12px;
+            color: #666;
+            background: #f9f9f9;
+            padding: 15px;
+            border-radius: 15px;
+        }
+        @media (max-width: 600px) {
+            .cube { width: 150px; height: 150px; }
+            .cube-face { width: 150px; height: 150px; font-size: 50px; }
+            .face1, .face2, .face3, .face4, .face5, .face6 { transform-origin: center; }
+            .face1 { transform: rotateY(0deg) translateZ(75px); }
+            .face2 { transform: rotateY(90deg) translateZ(75px); }
+            .face3 { transform: rotateY(180deg) translateZ(75px); }
+            .face4 { transform: rotateY(-90deg) translateZ(75px); }
+            .face5 { transform: rotateX(90deg) translateZ(75px); }
+            .face6 { transform: rotateX(-90deg) translateZ(75px); }
+        }
+    </style>
+</head>
+<body>
+<div class="game-container">
+    <h1>🎲 مكعب الأسئلة</h1>
+    <div class="subtitle">اضغط على المكعب أو الزر لرميه، وأجب عن السؤال الذي يظهر</div>
+    
+    <div class="cube" id="cube" onclick="rollCube()">
+        <div class="cube-inner" id="cubeInner">
+            <div class="cube-face face1">1</div>
+            <div class="cube-face face2">2</div>
+            <div class="cube-face face3">3</div>
+            <div class="cube-face face4">4</div>
+            <div class="cube-face face5">5</div>
+            <div class="cube-face face6">6</div>
+        </div>
+    </div>
+    
+    <button class="roll-btn" onclick="rollCube()">🎲 ارمِ المكعب</button>
+    
+    <div class="question-box" id="questionBox">
+        <div class="question-number">السؤال رقم <span id="questionNum">—</span></div>
+        <div class="question-text" id="questionText">اضغط على المكعب لتبدأ</div>
+    </div>
+    
+    <div class="questions-list">
+        <strong>📋 الأسئلة الحالية (يمكنك تغييرها):</strong><br>
+        1. ما الفكرة الرئيسة في النص؟<br>
+        2. اذكر استراتيجية تعلم مناسبة لهذا الدرس.<br>
+        3. ما القيمة التربوية المستفادة؟<br>
+        4. حلّل الصورة البيانية الأولى.<br>
+        5. كيف يمكن ربط الدرس بالواقع؟<br>
+        6. لخص الدرس في جملة واحدة.
+    </div>
+</div>
+
+<script>
+    // قائمة الأسئلة - يمكن تعديلها حسب الدرس
+    const questions = [
+        "ما الفكرة الرئيسة في النص؟",
+        "اذكر استراتيجية تعلم مناسبة لهذا الدرس.",
+        "ما القيمة التربوية المستفادة؟",
+        "حلّل الصورة البيانية الأولى.",
+        "كيف يمكن ربط الدرس بالواقع؟",
+        "لخص الدرس في جملة واحدة."
+    ];
+    
+    let currentNumber = null;
+    
+    function rollCube() {
+        const cubeInner = document.getElementById('cubeInner');
+        // إزالة الكلاس السابق لإعادة التشغيل
+        cubeInner.classList.remove('rolling');
+        void cubeInner.offsetWidth; // force reflow
+        cubeInner.classList.add('rolling');
+        
+        // رقم عشوائي من 1 إلى 6
+        const randomNumber = Math.floor(Math.random() * 6) + 1;
+        currentNumber = randomNumber;
+        
+        // حساب زاوية الدوران لجعل الوجه المطلوب في الأمام
+        let rotateX = 0, rotateY = 0;
+        switch(randomNumber) {
+            case 1: rotateY = 0; break;
+            case 2: rotateY = -90; break;
+            case 3: rotateY = 180; break;
+            case 4: rotateY = 90; break;
+            case 5: rotateX = -90; break;
+            case 6: rotateX = 90; break;
+        }
+        
+        // تطبيق الدوران مع نهاية الأنيميشن
+        setTimeout(() => {
+            cubeInner.style.transform = `rotateX(${rotateX}deg) rotateY(${rotateY}deg)`;
+            document.getElementById('questionNum').innerText = randomNumber;
+            document.getElementById('questionText').innerHTML = questions[randomNumber-1];
+        }, 400);
+    }
+    
+    // تهيئة أولية
+    document.getElementById('cubeInner').style.transform = 'rotateX(0deg) rotateY(0deg)';
+</script>
+</body>
+</html>

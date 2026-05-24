@@ -1,0 +1,300 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🕸️ شبكة العنكبوت - ربط الأفكار</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #2c3e50, #8e44ad);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 25px;
+            max-width: 1000px;
+            width: 100%;
+        }
+        h1 { text-align: center; color: #8e44ad; }
+        .topic-area {
+            background: #f0f4f8;
+            border-radius: 20px;
+            padding: 15px;
+            text-align: center;
+            margin: 20px 0;
+        }
+        .topic-text {
+            font-size: 22px;
+            font-weight: bold;
+            color: #2c3e66;
+        }
+        .web-container {
+            display: flex;
+            gap: 30px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .students-panel {
+            flex: 1;
+            min-width: 250px;
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 20px;
+        }
+        .canvas-panel {
+            flex: 1;
+            min-width: 300px;
+            text-align: center;
+        }
+        canvas {
+            background: #fef9e6;
+            border-radius: 20px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+            cursor: pointer;
+        }
+        .students-list {
+            list-style: none;
+            padding: 0;
+            margin: 15px 0;
+            max-height: 300px;
+            overflow-y: auto;
+        }
+        .student-item {
+            background: white;
+            padding: 10px;
+            margin: 8px 0;
+            border-radius: 15px;
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            cursor: pointer;
+            transition: 0.2s;
+            border: 2px solid transparent;
+        }
+        .student-item.selected {
+            border-color: #8e44ad;
+            background: #e8e0f0;
+        }
+        .student-name { font-weight: bold; }
+        .student-idea { font-size: 12px; color: #666; }
+        .idea-input {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+        }
+        input {
+            flex: 1;
+            padding: 10px;
+            border-radius: 25px;
+            border: 1px solid #ccc;
+        }
+        button {
+            background: #8e44ad;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 25px;
+            cursor: pointer;
+        }
+        .reset-btn { background: #e74c3c; }
+        .current-player {
+            font-size: 14px;
+            color: #8e44ad;
+            margin-top: 10px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🕸️ شبكة العنكبوت</h1>
+    <p style="text-align: center;">مرر الخيط وشارك فكرتك لبناء شبكة المعرفة</p>
+    
+    <div class="topic-area">
+        <div class="topic-text" id="topicText">📖 موضوع النقاش: أهمية القراءة في بناء الشخصية</div>
+        <button onclick="changeTopic()" style="background:#3498db; margin-top:8px;">🔄 تغيير الموضوع</button>
+    </div>
+    
+    <div class="web-container">
+        <div class="students-panel">
+            <h3>👥 الطلاب المشاركون</h3>
+            <div class="students-list" id="studentsList"></div>
+            <div class="idea-input">
+                <input type="text" id="ideaInput" placeholder="شارك فكرتك...">
+                <button onclick="addIdea()">➕ إضافة فكرة</button>
+            </div>
+            <div class="current-player" id="currentPlayerMsg"></div>
+        </div>
+        
+        <div class="canvas-panel">
+            <h3>🕸️ شبكة المعرفة</h3>
+            <canvas id="webCanvas" width="350" height="350" style="width:100%; height:auto; max-width:350px; max-height:350px"></canvas>
+            <button class="reset-btn" onclick="resetWeb()" style="margin-top:15px;">🔄 إعادة تعيين الشبكة</button>
+        </div>
+    </div>
+</div>
+
+<script>
+    let students = [
+        { name: "أحمد", idea: "", connected: false },
+        { name: "فاطمة", idea: "", connected: false },
+        { name: "محمد", idea: "", connected: false },
+        { name: "نورا", idea: "", connected: false },
+        { name: "عمر", idea: "", connected: false }
+    ];
+    let currentIndex = 0;
+    let topic = "أهمية القراءة في بناء الشخصية";
+    let connections = []; // سجل الاتصالات
+    
+    const topicsList = [
+        "أهمية القراءة في بناء الشخصية",
+        "دور التكنولوجيا في التعليم",
+        "كيف نحافظ على البيئة؟",
+        "أهمية العمل الجماعي"
+    ];
+    
+    function renderStudents() {
+        const container = document.getElementById('studentsList');
+        container.innerHTML = students.map((student, idx) => `
+            <div class="student-item ${idx === currentIndex ? 'selected' : ''}" onclick="selectStudent(${idx})">
+                <div>
+                    <div class="student-name">${student.name}</div>
+                    <div class="student-idea">${student.idea || "لم يشارك فكرة بعد"}</div>
+                </div>
+                <div>${student.connected ? '🔗' : '⚪'}</div>
+            </div>
+        `).join('');
+        document.getElementById('currentPlayerMsg').innerHTML = `🎤 الدور الآن للطالب: ${students[currentIndex].name}`;
+        drawWeb();
+    }
+    
+    function selectStudent(index) {
+        currentIndex = index;
+        renderStudents();
+    }
+    
+    function addIdea() {
+        const idea = document.getElementById('ideaInput').value.trim();
+        if (idea === "") {
+            alert("الرجاء كتابة فكرتك أولاً.");
+            return;
+        }
+        
+        // تسجيل الفكرة
+        students[currentIndex].idea = idea;
+        
+        // تسجيل الاتصال (إذا لم يكن متصلاً بعد)
+        if (!students[currentIndex].connected && connections.length > 0) {
+            const lastIndex = connections[connections.length - 1].to;
+            connections.push({ from: lastIndex, to: currentIndex, idea: idea });
+            students[currentIndex].connected = true;
+        } else if (connections.length === 0) {
+            // أول مشارك
+            connections.push({ from: currentIndex, to: currentIndex, idea: idea });
+            students[currentIndex].connected = true;
+        } else {
+            connections.push({ from: currentIndex, to: currentIndex, idea: idea });
+        }
+        
+        // الانتقال للطالب التالي
+        currentIndex = (currentIndex + 1) % students.length;
+        
+        document.getElementById('ideaInput').value = "";
+        renderStudents();
+        
+        if (students.every(s => s.connected && s.idea !== "")) {
+            setTimeout(() => {
+                alert("🎉 اكتملت شبكة المعرفة! لقد شارك جميع الطلاب.");
+            }, 500);
+        }
+    }
+    
+    function drawWeb() {
+        const canvas = document.getElementById('webCanvas');
+        const ctx = canvas.getContext('2d');
+        const width = canvas.width;
+        const height = canvas.height;
+        
+        ctx.clearRect(0, 0, width, height);
+        
+        if (connections.length === 0) {
+            ctx.fillStyle = "#999";
+            ctx.font = "14px 'Segoe UI'";
+            ctx.fillText("ابدأ بتمرير الخيط...", width/2-80, height/2);
+            return;
+        }
+        
+        // رسم الاتصالات
+        const centerX = width/2;
+        const centerY = height/2;
+        const radius = 120;
+        
+        connections.forEach((conn, idx) => {
+            const angle1 = (conn.from / students.length) * Math.PI * 2;
+            const angle2 = (conn.to / students.length) * Math.PI * 2;
+            const x1 = centerX + radius * Math.cos(angle1);
+            const y1 = centerY + radius * Math.sin(angle1);
+            const x2 = centerX + radius * Math.cos(angle2);
+            const y2 = centerY + radius * Math.sin(angle2);
+            
+            ctx.beginPath();
+            ctx.moveTo(x1, y1);
+            ctx.lineTo(x2, y2);
+            ctx.strokeStyle = "#8e44ad";
+            ctx.lineWidth = 2;
+            ctx.stroke();
+        });
+        
+        // رسم الطلاب
+        students.forEach((student, idx) => {
+            const angle = (idx / students.length) * Math.PI * 2;
+            const x = centerX + radius * Math.cos(angle);
+            const y = centerY + radius * Math.sin(angle);
+            
+            ctx.beginPath();
+            ctx.arc(x, y, 25, 0, Math.PI * 2);
+            ctx.fillStyle = student.connected ? "#8e44ad" : "#ccc";
+            ctx.fill();
+            ctx.fillStyle = "white";
+            ctx.font = "bold 14px 'Segoe UI'";
+            ctx.fillText(student.name.charAt(0), x-7, y+5);
+            
+            ctx.fillStyle = "#333";
+            ctx.font = "10px 'Segoe UI'";
+            ctx.fillText(student.name, x-15, y+30);
+        });
+    }
+    
+    function changeTopic() {
+        const currentIndex = topicsList.indexOf(topic);
+        const nextIndex = (currentIndex + 1) % topicsList.length;
+        topic = topicsList[nextIndex];
+        document.getElementById('topicText').innerHTML = `📖 موضوع النقاش: ${topic}`;
+        resetWeb();
+    }
+    
+    function resetWeb() {
+        students = [
+            { name: "أحمد", idea: "", connected: false },
+            { name: "فاطمة", idea: "", connected: false },
+            { name: "محمد", idea: "", connected: false },
+            { name: "نورا", idea: "", connected: false },
+            { name: "عمر", idea: "", connected: false }
+        ];
+        currentIndex = 0;
+        connections = [];
+        renderStudents();
+    }
+    
+    renderStudents();
+</script>
+</body>
+</html>

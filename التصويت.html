@@ -1,0 +1,216 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🚦 أكواب إشارة المرور - تعبير عن مستوى الفهم</title>
+    <style>
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: #2c3e50;
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 30px;
+            max-width: 800px;
+            width: 100%;
+            text-align: center;
+        }
+        h1 { color: #2c3e50; }
+        .question {
+            background: #ecf0f1;
+            padding: 20px;
+            border-radius: 20px;
+            margin: 20px 0;
+            font-size: 20px;
+            font-weight: bold;
+        }
+        .cups-container {
+            display: flex;
+            justify-content: center;
+            gap: 30px;
+            margin: 25px 0;
+            flex-wrap: wrap;
+        }
+        .cup {
+            width: 120px;
+            padding: 20px;
+            border-radius: 20px;
+            cursor: pointer;
+            transition: 0.3s;
+            text-align: center;
+            background: #f0f0f0;
+        }
+        .cup.red { background: #ff6b6b; color: white; }
+        .cup.yellow { background: #feca57; color: #333; }
+        .cup.green { background: #48dbfb; color: white; }
+        .cup.selected { transform: scale(1.1); box-shadow: 0 10px 20px rgba(0,0,0,0.2); border: 3px solid #2c3e50; }
+        .cup-icon { font-size: 50px; }
+        .cup-label { font-size: 18px; font-weight: bold; margin-top: 10px; }
+        .cup-desc { font-size: 12px; margin-top: 5px; }
+        
+        .results {
+            background: #f9e79f;
+            border-radius: 20px;
+            padding: 20px;
+            margin-top: 20px;
+        }
+        .stats {
+            display: flex;
+            justify-content: space-around;
+            margin-top: 15px;
+        }
+        .stat-item { text-align: center; }
+        .stat-count { font-size: 28px; font-weight: bold; }
+        .teacher-note {
+            background: #d5f5e3;
+            padding: 15px;
+            border-radius: 20px;
+            margin-top: 20px;
+            text-align: right;
+        }
+        button {
+            background: #3498db;
+            color: white;
+            border: none;
+            padding: 10px 20px;
+            border-radius: 30px;
+            cursor: pointer;
+            margin-top: 15px;
+        }
+        .students-list {
+            margin-top: 20px;
+            max-height: 200px;
+            overflow-y: auto;
+            text-align: right;
+        }
+        .student-choice {
+            display: inline-block;
+            margin: 5px;
+            padding: 5px 10px;
+            border-radius: 15px;
+            font-size: 12px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🚦 أكواب إشارة المرور</h1>
+    <p>اختر اللون الذي يعبر عن فهمك للدرس:</p>
+    
+    <div class="question" id="currentQuestion">
+        📖 ما مدى فهمك للدرس الحالي؟
+    </div>
+    
+    <div class="cups-container">
+        <div class="cup red" onclick="submitVote('red')">
+            <div class="cup-icon">🔴</div>
+            <div class="cup-label">أحمر</div>
+            <div class="cup-desc">لا أفهم / بحاجة لمساعدة</div>
+        </div>
+        <div class="cup yellow" onclick="submitVote('yellow')">
+            <div class="cup-icon">🟡</div>
+            <div class="cup-label">أصفر</div>
+            <div class="cup-desc">أفهم جزئيًا / بحاجة لتوضيح</div>
+        </div>
+        <div class="cup green" onclick="submitVote('green')">
+            <div class="cup-icon">🟢</div>
+            <div class="cup-label">أخضر</div>
+            <div class="cup-desc">أفهم تمامًا / مستعد</div>
+        </div>
+    </div>
+    
+    <div class="results">
+        <strong>📊 نتائج التصويت:</strong>
+        <div class="stats">
+            <div class="stat-item"><span style="color:#e74c3c">🔴</span><br><span id="redCount">0</span></div>
+            <div class="stat-item"><span style="color:#f39c12">🟡</span><br><span id="yellowCount">0</span></div>
+            <div class="stat-item"><span style="color:#2ecc71">🟢</span><br><span id="greenCount">0</span></div>
+        </div>
+        <div class="students-list" id="studentsList"></div>
+    </div>
+    
+    <div class="teacher-note" id="teacherNote">
+        💡 <strong>ملاحظة للمعلم:</strong> سيساعدك هذا التصويت على معرفة من يحتاج دعمًا إضافيًا.
+    </div>
+    
+    <button onclick="resetVotes()">🔄 إعادة ضبط التصويت</button>
+</div>
+
+<script>
+    let votes = { red: 0, yellow: 0, green: 0 };
+    let studentsVotes = []; // { name, color }
+    let currentStudentId = 0;
+    
+    // يمكن تعديل هذه القائمة حسب أسماء الطلاب الحقيقيين
+    let studentNames = [
+        "أحمد", "فاطمة", "محمد", "نورا", "عمر", "سارة", "خالد", "ليلى", "يوسف", "آية"
+    ];
+    
+    function submitVote(color) {
+        if (currentStudentId >= studentNames.length) {
+            alert("انتهى التصويت! أعد الضبط لبدء جولة جديدة.");
+            return;
+        }
+        const studentName = studentNames[currentStudentId];
+        studentsVotes.push({ name: studentName, color: color });
+        votes[color]++;
+        currentStudentId++;
+        
+        updateDisplay();
+        
+        if (currentStudentId < studentNames.length) {
+            document.getElementById('currentQuestion').innerHTML = `📖 ${studentNames[currentStudentId]}، ما مدى فهمك للدرس؟`;
+        } else {
+            document.getElementById('currentQuestion').innerHTML = "✅ انتهى التصويت! شكرًا لجميع الطلاب.";
+            provideTeacherFeedback();
+        }
+    }
+    
+    function updateDisplay() {
+        document.getElementById('redCount').innerText = votes.red;
+        document.getElementById('yellowCount').innerText = votes.yellow;
+        document.getElementById('greenCount').innerText = votes.green;
+        
+        const listDiv = document.getElementById('studentsList');
+        listDiv.innerHTML = studentsVotes.map(v => {
+            let emoji = v.color === 'red' ? '🔴' : (v.color === 'yellow' ? '🟡' : '🟢');
+            return `<div class="student-choice" style="background:${v.color === 'red' ? '#ffcccc' : (v.color === 'yellow' ? '#fff3cd' : '#d4edda')}">${v.name} ${emoji}</div>`;
+        }).join('');
+    }
+    
+    function provideTeacherFeedback() {
+        const noteDiv = document.getElementById('teacherNote');
+        let message = "";
+        if (votes.red > votes.green) {
+            message = "⚠️ معظم الطلاب بحاجة لدعم إضافي. يُنصح بإعادة شرح المفاهيم الأساسية.";
+        } else if (votes.yellow > 0) {
+            message = "📌 بعض الطلاب بحاجة لتوضيح. يمكن عمل مجموعات دعم.";
+        } else {
+            message = "🎉 معظم الطلاب متقنون! يمكن الانتقال إلى مستوى أعلى أو أنشطة تطبيقية.";
+        }
+        noteDiv.innerHTML = `💡 <strong>توصية المعلم:</strong><br>${message}<br>🔴 ${votes.red} طالب | 🟡 ${votes.yellow} طالب | 🟢 ${votes.green} طالب`;
+    }
+    
+    function resetVotes() {
+        votes = { red: 0, yellow: 0, green: 0 };
+        studentsVotes = [];
+        currentStudentId = 0;
+        updateDisplay();
+        document.getElementById('currentQuestion').innerHTML = `📖 ${studentNames[0]}، ما مدى فهمك للدرس؟`;
+        document.getElementById('teacherNote').innerHTML = `💡 <strong>ملاحظة للمعلم:</strong> سيساعدك هذا التصويت على معرفة من يحتاج دعمًا إضافيًا.`;
+    }
+    
+    // بدء التصويت بأول طالب
+    resetVotes();
+</script>
+</body>
+</html>

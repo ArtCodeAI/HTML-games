@@ -1,0 +1,140 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🔍 فحص الأقران - Peer Check</title>
+    <style>
+        * { box-sizing: border-box; }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #11998e, #38ef7d);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            background: white;
+            border-radius: 30px;
+            padding: 25px;
+            max-width: 1000px;
+            width: 100%;
+        }
+        h1 { text-align: center; color: #11998e; }
+        .pairs-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+        }
+        .pair-card {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 15px;
+            width: 300px;
+            border: 2px solid #11998e;
+        }
+        .pair-title {
+            background: #11998e;
+            color: white;
+            padding: 8px;
+            border-radius: 15px;
+            text-align: center;
+            margin-bottom: 15px;
+        }
+        .student {
+            background: white;
+            border-radius: 15px;
+            padding: 12px;
+            margin: 10px 0;
+        }
+        .student-name { font-weight: bold; color: #11998e; }
+        textarea {
+            width: 100%;
+            padding: 8px;
+            border-radius: 10px;
+            border: 1px solid #ccc;
+            margin: 8px 0;
+            resize: vertical;
+        }
+        .feedback-area {
+            background: #fff3cd;
+            border-radius: 10px;
+            padding: 10px;
+            margin-top: 10px;
+        }
+        button {
+            background: #11998e;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 20px;
+            cursor: pointer;
+            margin: 5px;
+        }
+        .check-btn { background: #3498db; }
+        .reset-btn { background: #e74c3c; }
+        .status {
+            font-size: 12px;
+            margin-top: 5px;
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🔍 فحص الأقران</h1>
+    <p style="text-align: center;">كل طالب يكتب إجابته، ثم يراجع إجابة زميله ويقدم تغذية راجعة</p>
+    
+    <div class="pairs-container" id="pairsContainer"></div>
+    
+    <div style="text-align: center; margin-top: 20px;">
+        <button class="reset-btn" onclick="resetAll()">🔄 إعادة تعيين الكل</button>
+    </div>
+</div>
+
+<script>
+    let pairs = [
+        { 
+            student1: { name: "أحمد", answer: "", reviewed: false, feedback: "" },
+            student2: { name: "خالد", answer: "", reviewed: false, feedback: "" }
+        },
+        { 
+            student1: { name: "فاطمة", answer: "", reviewed: false, feedback: "" },
+            student2: { name: "نورا", answer: "", reviewed: false, feedback: "" }
+        },
+        { 
+            student1: { name: "محمد", answer: "", reviewed: false, feedback: "" },
+            student2: { name: "عمر", answer: "", reviewed: false, feedback: "" }
+        }
+    ];
+    
+    const question = "ما أهمية التعاون في بناء المجتمع؟";
+    
+    function renderPairs() {
+        const container = document.getElementById('pairsContainer');
+        container.innerHTML = pairs.map((pair, pairIdx) => `
+            <div class="pair-card">
+                <div class="pair-title">👥 الزوج ${pairIdx + 1}</div>
+                <div class="student">
+                    <div class="student-name">${pair.student1.name}</div>
+                    <textarea id="answer1_${pairIdx}" rows="2" placeholder="أكتب إجابتك..." ${pair.student1.reviewed ? 'disabled' : ''}>${pair.student1.answer}</textarea>
+                    <button onclick="saveAnswer(${pairIdx}, 1)">💾 حفظ الإجابة</button>
+                    ${pair.student1.reviewed ? `
+                        <div class="feedback-area">
+                            <strong>📝 تغذية راجعة من ${pair.student2.name}:</strong><br>
+                            ${pair.student1.feedback || "لم يتم تقديم تغذية راجعة بعد"}
+                        </div>
+                    ` : ''}
+                </div>
+                <div class="student">
+                    <div class="student-name">${pair.student2.name}</div>
+                    <textarea id="answer2_${pairIdx}" rows="2" placeholder="أكتب إجابتك..." ${pair.student2.reviewed ? 'disabled' : ''}>${pair.student2.answer}</textarea>
+                    <button onclick="saveAnswer(${pairIdx}, 2)">💾 حفظ الإجابة</button>
+                    ${pair.student2.reviewed ? `
+                        <div class="feedback-area">
+                            <strong>📝 تغذية راجعة من ${pair.student1.name}:</strong><br>
+                            ${pair.student2.feedback || "لم يتم تقديم تغذية راجعة

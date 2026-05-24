@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="ar">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>🧩 التعلم التعاوني التكاملي - Jigsaw</title>
+    <style>
+        * {
+            box-sizing: border-box;
+        }
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            display: flex;
+            justify-content: center;
+            align-items: center;
+            min-height: 100vh;
+            margin: 0;
+            padding: 20px;
+            direction: rtl;
+        }
+        .container {
+            max-width: 1200px;
+            width: 100%;
+            background: white;
+            border-radius: 30px;
+            padding: 25px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.2);
+        }
+        h1, h2 {
+            text-align: center;
+            color: #667eea;
+        }
+        .phase-buttons {
+            display: flex;
+            justify-content: center;
+            gap: 15px;
+            margin: 20px 0;
+        }
+        .phase-btn {
+            background: #e0e7ff;
+            border: none;
+            padding: 10px 25px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+        .phase-btn.active {
+            background: #667eea;
+            color: white;
+        }
+        .groups-container {
+            display: flex;
+            gap: 20px;
+            flex-wrap: wrap;
+            justify-content: center;
+            margin: 20px 0;
+        }
+        .group-card {
+            background: #f8f9fa;
+            border-radius: 20px;
+            padding: 15px;
+            width: 280px;
+            box-shadow: 0 5px 15px rgba(0,0,0,0.1);
+        }
+        .group-title {
+            font-size: 20px;
+            font-weight: bold;
+            text-align: center;
+            padding: 10px;
+            border-radius: 15px;
+            margin-bottom: 15px;
+        }
+        .group-title.original { background: #d5f5e3; color: #27ae60; }
+        .group-title.expert { background: #fdebd0; color: #e67e22; }
+        .member-list {
+            list-style: none;
+            padding: 0;
+        }
+        .member-list li {
+            padding: 8px;
+            border-bottom: 1px solid #eee;
+            display: flex;
+            justify-content: space-between;
+        }
+        .topic {
+            background: #fff3cd;
+            padding: 10px;
+            border-radius: 10px;
+            margin-top: 10px;
+            font-size: 14px;
+        }
+        .expert-topic {
+            background: #d4edda;
+            padding: 8px;
+            border-radius: 10px;
+            margin: 5px 0;
+            font-size: 13px;
+        }
+        .instruction {
+            background: #e8f4fd;
+            padding: 15px;
+            border-radius: 15px;
+            margin: 20px 0;
+            text-align: center;
+        }
+        .next-btn {
+            background: #27ae60;
+            color: white;
+            border: none;
+            padding: 12px 30px;
+            border-radius: 30px;
+            cursor: pointer;
+            font-size: 16px;
+            display: block;
+            margin: 20px auto;
+        }
+        @media (max-width: 768px) {
+            .group-card { width: 100%; }
+        }
+    </style>
+</head>
+<body>
+<div class="container">
+    <h1>🧩 التعلم التعاوني التكاملي</h1>
+    <h2>إستراتيجية Jigsaw</h2>
+    
+    <div class="phase-buttons">
+        <button class="phase-btn active" onclick="showPhase('original')">المرحلة 1: المجموعات الأصلية</button>
+        <button class="phase-btn" onclick="showPhase('expert')">المرحلة 2: المجموعات الخبيرة</button>
+        <button class="phase-btn" onclick="showPhase('return')">المرحلة 3: العودة للمجموعات الأصلية</button>
+    </div>
+    
+    <div class="instruction" id="instruction">
+        📖 <strong>التعليمات:</strong> يقسم الطلاب إلى مجموعات أصلية، كل طالب يتخصص في جزء معين، ثم يلتقي الخبراء، ثم يعودون لتعليم زملائهم.
+    </div>
+    
+    <div id="phaseContent"></div>
+    
+    <button class="next-btn" id="nextBtn" onclick="nextPhase()">➡️ الانتقال للمرحلة التالية</button>
+</div>
+
+<script>
+    let currentPhase = 'original';
+    
+    const originalGroups = [
+        { name: "المجموعة 1", members: ["أحمد", "فاطمة", "محمد", "نورا"], expertTopics: ["جزء 1: المقدمة", "جزء 2: العرض", "جزء 3: الخاتمة", "جزء 4: الخلاصة"] },
+        { name: "المجموعة 2", members: ["سارة", "خالد", "مريم", "عمر"], expertTopics: ["جزء 1: المقدمة", "جزء 2: العرض", "جزء 3: الخاتمة", "جزء 4: الخلاصة"] },
+        { name: "المجموعة 3", members: ["ليلى", "يوسف", "آية", "علي"], expertTopics: ["جزء 1: المقدمة", "جزء 2: العرض", "جزء 3: الخاتمة", "جزء 4: الخلاصة"] }
+    ];
+    
+    function showPhase(phase) {
+        currentPhase = phase;
+        document.querySelectorAll('.phase-btn').forEach(btn => btn.classList.remove('active'));
+        event.target.classList.add('active');
+        renderPhase();
+    }
+    
+    function renderPhase() {
+        const container = document.getElementById('phaseContent');
+        const instruction = document.getElementById('instruction');
+        
+        if (currentPhase === 'original') {
+            instruction.innerHTML = "📖 <strong>المرحلة 1 - المجموعات الأصلية:</strong> يجتمع الطلاب في مجموعاتهم الأصلية، ويقرؤون النص كاملاً، ثم يخططون لمن سيتخصص في أي جزء.";
+            container.innerHTML = `
+                <div class="groups-container">
+                    ${originalGroups.map(group => `
+                        <div class="group-card">
+                            <div class="group-title original">🏠 ${group.name}</div>
+                            <ul class="member-list">
+                                ${group.members.map((member, idx) => `
+                                    <li>👤 ${member} <span style="color:#27ae60;">➡️ ${group.expertTopics[idx]}</span></li>
+                                `).join('')}
+                            </ul>
+                            <div class="topic">📚 النص: موضوع الدرس الرئيسي</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } 
+        else if (currentPhase === 'expert') {
+            instruction.innerHTML = "📖 <strong>المرحلة 2 - المجموعات الخبيرة:</strong> يلتقي الطلاب الذين لديهم نفس الجزء من مجموعات مختلفة، ويتخصصون فيه بعمق.";
+            // بناء مجموعات خبيرة
+            const expertGroups = {};
+            originalGroups.forEach(group => {
+                group.members.forEach((member, idx) => {
+                    const topic = group.expertTopics[idx];
+                    if (!expertGroups[topic]) expertGroups[topic] = [];
+                    expertGroups[topic].push({ name: member, originalGroup: group.name });
+                });
+            });
+            
+            container.innerHTML = `
+                <div class="groups-container">
+                    ${Object.entries(expertGroups).map(([topic, members]) => `
+                        <div class="group-card">
+                            <div class="group-title expert">🧠 خبراء ${topic}</div>
+                            <ul class="member-list">
+                                ${members.map(m => `<li>👤 ${m.name} <span style="color:#e67e22;">(من ${m.originalGroup})</span></li>`).join('')}
+                            </ul>
+                            <div class="expert-topic">📌 يتخصصون في: ${topic}</div>
+                            <div class="expert-topic">📖 مهمتهم: دراسة الجزء بعمق، وتحضير طريقة لشرحه لزملائهم</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        } 
+        else {
+            instruction.innerHTML = "📖 <strong>المرحلة 3 - العودة للمجموعات الأصلية:</strong> يعود كل خبير إلى مجموعته الأصلية ويقوم بتعليم زملائه الجزء الذي تخصص فيه.";
+            container.innerHTML = `
+                <div class="groups-container">
+                    ${originalGroups.map(group => `
+                        <div class="group-card">
+                            <div class="group-title original">🔄 ${group.name} - جلسة التعليم المتبادل</div>
+                            <ul class="member-list">
+                                ${group.members.map((member, idx) => `
+                                    <li>👤 ${member} <span style="color:#27ae60;">يشرح: ${group.expertTopics[idx]}</span></li>
+                                `).join('')}
+                            </ul>
+                            <div class="topic">✅ بعد انتهاء الجميع من الشرح، يكون كل فرد قد فهم جميع أجزاء الموضوع</div>
+                        </div>
+                    `).join('')}
+                </div>
+            `;
+        }
+    }
+    
+    function nextPhase() {
+        if (currentPhase === 'original') showPhaseTo('expert');
+        else if (currentPhase === 'expert') showPhaseTo('return');
+        else if (currentPhase === 'return') {
+            alert("🎉 اكتملت استراتيجية Jigsaw! يمكن بدء جولة جديدة.");
+            showPhaseTo('original');
+        }
+    }
+    
+    function showPhaseTo(phase) {
+        currentPhase = phase;
+        document.querySelectorAll('.phase-btn').forEach(btn => {
+            if ((phase === 'original' && btn.innerText.includes('الأصلية')) ||
+                (phase === 'expert' && btn.innerText.includes('الخبيرة')) ||
+                (phase === 'return' && btn.innerText.includes('العودة'))) {
+                btn.classList.add('active');
+            } else {
+                btn.classList.remove('active');
+            }
+        });
+        renderPhase();
+    }
+    
+    renderPhase();
+</script>
+</body>
+</html>
